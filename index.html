@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Primary Meta Tags -->
+<title>🎲 大富翁教學遊戲 | 課堂互動遊戲 | 寓教於樂</title>
+<meta name="title" content="🎲 大富翁教學遊戲 | 課堂互動遊戲 | 寓教於樂">
+<meta name="description" content="專為課堂教學設計的互動式大富翁遊戲，支援 2-6 人遊玩，含 3D 骰子、任務系統、迷霧模式。適用於體育、英文、數學等各科教學，讓學生透過遊戲完成真實學習任務！">
+<meta name="keywords" content="大富翁遊戲,教學遊戲,課堂遊戲,互動遊戲,教育遊戲,桌遊,學習遊戲,任務遊戲,骰子遊戲,免費遊戲">
+<meta name="author" content="Educational Game Project">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://your-domain.com/">
+<meta property="og:title" content="🎲 大富翁教學遊戲 | 課堂互動遊戲">
+<meta property="og:description" content="專為課堂教學設計的互動式大富翁遊戲，支援 2-6 人遊玩，讓學習變得更有趣！">
+<meta property="og:image" content="https://your-domain.com/preview.png">
+<meta property="og:site_name" content="大富翁教學遊戲">
+<meta property="og:locale" content="zh_TW">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://your-domain.com/">
+<meta property="twitter:title" content="🎲 大富翁教學遊戲 | 課堂互動遊戲">
+<meta property="twitter:description" content="專為課堂教學設計的互動式大富翁遊戲，支援 2-6 人遊玩，讓學習變得更有趣！">
+<meta property="twitter:image" content="https://your-domain.com/preview.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#667eea">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="大富翁遊戲">
+
+<!-- Structured Data / JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "大富翁教學遊戲",
+  "description": "專為課堂教學設計的互動式大富翁遊戲，支援 2-6 人遊玩，含 3D 骰子、任務系統、迷霧模式",
+  "url": "https://your-domain.com/",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Web Browser",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TWD"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "Educational Game Project"
+  },
+  "inLanguage": "zh-TW",
+  "browserRequirements": "Requires JavaScript. Requires HTML5.",
+  "softwareVersion": "1.0",
+  "releaseNotes": "初版發布",
+  "featureList": [
+    "3D 骰子動畫",
+    "自訂任務系統",
+    "2-6 人多人遊戲",
+    "迷霧探索模式",
+    "響應式設計",
+    "設定匯入匯出",
+    "即時計分系統"
+  ]
+}
+</script>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Microsoft JhengHei', 'PingFang TC', 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    min-height: 100vh;
+    padding: 20px;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    text-align: center;
+    color: white;
+    font-size: 3em;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+    margin-bottom: 30px;
+    animation: titleBounce 2s ease-in-out infinite;
+  }
+
+  @keyframes titleBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* ========== 設定頁面 ========== */
+  #setupPage {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .setup-section {
+    margin-bottom: 30px;
+  }
+
+  .setup-section h2 {
+    color: #667eea;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+  }
+
+  .input-group {
+    margin-bottom: 15px;
+  }
+
+  .input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .input-group input,
+  .input-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+  }
+
+  .input-group input:focus,
+  .input-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+
+  .input-group textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+  }
+
+  .player-input {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 10px;
+    align-items: start;
+    margin-bottom: 15px;
+  }
+
+  .player-color {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .player-color:hover {
+    transform: scale(1.1);
+  }
+
+  .player-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .color-picker {
+    display: none;
+    grid-template-columns: repeat(10, 28px);
+    gap: 5px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    margin-top: 5px;
+  }
+
+  .color-picker.active {
+    display: grid;
+  }
+
+  .color-option {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .color-option:hover {
+    transform: scale(1.15);
+    border-color: #999;
+  }
+
+  .color-option.selected {
+    border-color: #333;
+    border-width: 3px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
+  }
+
+  .task-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 4px solid #667eea;
+  }
+
+  .task-item textarea {
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  .btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  .btn-small {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #eb3349, #f45c43);
+  }
+
+  /* ========== 遊戲頁面 ========== */
+  #gamePage {
+    display: none;
+  }
+
+  .game-header {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  }
+
+  .game-main {
+    position: relative;
+  }
+
+  /* 浮動控制按鈕 */
+  .floating-button {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    font-size: 32px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 999;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .floating-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.4);
+  }
+
+  .floating-button.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .players-info-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .player-card {
+    background: linear-gradient(135deg, #f5f7fa, #e8eef5);
+    padding: 10px 12px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .player-card.active {
+    border-color: #ffd700;
+    background: linear-gradient(135deg, #fff8dc, #fffacd);
+    box-shadow: 0 3px 12px rgba(255, 215, 0, 0.4);
+    transform: translateX(5px);
+  }
+
+  .player-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .player-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid white;
+    flex-shrink: 0;
+  }
+
+  .player-name {
+    font-weight: bold;
+    font-size: 0.95em;
+    color: #333;
+  }
+
+  .player-score {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #667eea;
+    white-space: nowrap;
+  }
+
+  /* ========== 棋盤 ========== */
+  #boardContainer {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  #board {
+    display: grid;
+    gap: 8px;
+    max-width: 100%;
+    margin: 0 auto;
+    justify-items: stretch;
+  }
+
+  /* 處理蛇形排列時不完整行的對齊 */
+  .cell.align-right {
+    grid-column-start: auto;
+  }
+
+  .cell {
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #e0e7ff, #cfe2ff);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    position: relative;
+    font-size: 0.85em;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 3px solid transparent;
+  }
+
+  .cell:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+  }
+
+  .cell.start {
+    background: linear-gradient(135deg, #56ab2f, #a8e063);
+    font-weight: bold;
+    font-size: 1.1em;
+    color: white;
+  }
+
+  .cell.finish {
+    background: linear-gradient(135deg, #ff6b6b, #feca57);
+    font-weight: bold;
+    font-size: 1.1em;
+    color: white;
+  }
+
+  .cell.has-task {
+    background: linear-gradient(135deg, #ffd89b, #19547b);
+    color: white;
+    font-weight: 500;
+  }
+
+  .cell.current {
+    border-color: #ffd700;
+    animation: cellGlow 1s ease-in-out infinite;
+  }
+
+  @keyframes cellGlow {
+    0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+  }
+
+  /* 迷霧遮蓋效果 */
+  .cell.fog-covered {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cell.fog-covered::before {
+    content: '?';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(150, 150, 150, 0.95), rgba(100, 100, 100, 0.95));
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5em;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    z-index: 10;
+    animation: fogPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes fogPulse {
+    0%, 100% { opacity: 0.95; }
+    50% { opacity: 0.85; }
+  }
+
+  .cell.fog-covered .cell-number,
+  .cell.fog-covered > div:not(.cell-players) {
+    visibility: hidden;
+  }
+
+  .cell-number {
+    position: absolute;
+    top: 3px;
+    left: 6px;
+    font-size: 0.7em;
+    font-weight: bold;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cell-players {
+    position: absolute;
+    bottom: 5px;
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 90%;
+  }
+
+  .player-token {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    animation: tokenBounce 0.5s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+
+  @keyframes tokenBounce {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  /* ========== 骰子控制側邊欄 ========== */
+  .dice-control {
+    position: fixed;
+    right: -320px;
+    top: 0;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.3);
+    transition: right 0.3s ease-in-out;
+    z-index: 998;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .dice-control.open {
+    right: 0;
+  }
+
+  .dice-control-fixed {
+    flex-shrink: 0;
+    padding: 20px;
+    padding-bottom: 10px;
+  }
+
+  .dice-control-scrollable {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px 20px 20px;
+  }
+
+  .dice-control-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .close-sidebar {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 5px;
+    line-height: 1;
+  }
+
+  .close-sidebar:hover {
+    color: #333;
+  }
+
+  /* 遮罩層 */
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    z-index: 997;
+  }
+
+  .sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+
+  #diceDisplay {
+    perspective: 1000px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 15px 0;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  #diceDisplay:hover:not(.disabled) {
+    transform: scale(1.05);
+  }
+
+  #diceDisplay.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .dice-3d {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.1s;
+    pointer-events: none;
+  }
+
+  .dice-3d.rolling {
+    animation: diceRoll 0.6s ease-out;
+  }
+
+  @keyframes diceRoll {
+    0% { transform: rotateX(0deg) rotateY(0deg); }
+    25% { transform: rotateX(180deg) rotateY(180deg); }
+    50% { transform: rotateX(360deg) rotateY(360deg); }
+    75% { transform: rotateX(540deg) rotateY(540deg); }
+    100% { transform: rotateX(720deg) rotateY(720deg); }
+  }
+
+  .dice-face {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #ffffff, #f0f0f0);
+    border: 2px solid #333;
+    border-radius: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+  }
+
+  .dice-dot {
+    width: 18px;
+    height: 18px;
+    background: #333;
+    border-radius: 50%;
+    box-shadow: inset 0 2px 3px rgba(0,0,0,0.3);
+  }
+
+  /* 骰子各面的位置 */
+  .dice-face.front  { transform: translateZ(50px); }
+  .dice-face.back   { transform: rotateY(180deg) translateZ(50px); }
+  .dice-face.right  { transform: rotateY(90deg) translateZ(50px); }
+  .dice-face.left   { transform: rotateY(-90deg) translateZ(50px); }
+  .dice-face.top    { transform: rotateX(90deg) translateZ(50px); }
+  .dice-face.bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+  /* 各面點數的佈局 */
+  .dice-face.face-1 {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .dice-face.face-2 {
+    display: grid;
+    grid-template-areas:
+      "a . ."
+      ". . ."
+      ". . b";
+    padding: 15px;
+    gap: 0;
+  }
+  .dice-face.face-2 .dice-dot:nth-child(1) { grid-area: a; }
+  .dice-face.face-2 .dice-dot:nth-child(2) { grid-area: b; }
+
+  .dice-face.face-3 {
+    display: grid;
+    grid-template-areas:
+      "a . ."
+      ". b ."
+      ". . c";
+    padding: 15px;
+    gap: 0;
+  }
+  .dice-face.face-3 .dice-dot:nth-child(1) { grid-area: a; }
+  .dice-face.face-3 .dice-dot:nth-child(2) { grid-area: b; }
+  .dice-face.face-3 .dice-dot:nth-child(3) { grid-area: c; }
+
+  .dice-face.face-4 {
+    display: grid;
+    grid-template-areas:
+      "a . b"
+      ". . ."
+      "c . d";
+    padding: 15px;
+    gap: 0;
+  }
+  .dice-face.face-4 .dice-dot:nth-child(1) { grid-area: a; }
+  .dice-face.face-4 .dice-dot:nth-child(2) { grid-area: b; }
+  .dice-face.face-4 .dice-dot:nth-child(3) { grid-area: c; }
+  .dice-face.face-4 .dice-dot:nth-child(4) { grid-area: d; }
+
+  .dice-face.face-5 {
+    display: grid;
+    grid-template-areas:
+      "a . b"
+      ". c ."
+      "d . e";
+    padding: 15px;
+    gap: 0;
+  }
+  .dice-face.face-5 .dice-dot:nth-child(1) { grid-area: a; }
+  .dice-face.face-5 .dice-dot:nth-child(2) { grid-area: b; }
+  .dice-face.face-5 .dice-dot:nth-child(3) { grid-area: c; }
+  .dice-face.face-5 .dice-dot:nth-child(4) { grid-area: d; }
+  .dice-face.face-5 .dice-dot:nth-child(5) { grid-area: e; }
+
+  .dice-face.face-6 {
+    display: grid;
+    grid-template-areas:
+      "a . b"
+      "c . d"
+      "e . f";
+    padding: 15px;
+    gap: 0;
+  }
+  .dice-face.face-6 .dice-dot:nth-child(1) { grid-area: a; }
+  .dice-face.face-6 .dice-dot:nth-child(2) { grid-area: b; }
+  .dice-face.face-6 .dice-dot:nth-child(3) { grid-area: c; }
+  .dice-face.face-6 .dice-dot:nth-child(4) { grid-area: d; }
+  .dice-face.face-6 .dice-dot:nth-child(5) { grid-area: e; }
+  .dice-face.face-6 .dice-dot:nth-child(6) { grid-area: f; }
+
+  /* ========== 任務彈窗 ========== */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s;
+  }
+
+  .modal.active {
+    display: flex;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+    animation: slideUp 0.4s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-header {
+    font-size: 2em;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .modal-body {
+    font-size: 1.3em;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 5px solid #667eea;
+  }
+
+  .modal-footer {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+  }
+
+  /* ========== 結果頁面 ========== */
+  #resultPage {
+    display: none;
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .result-title {
+    text-align: center;
+    font-size: 2.5em;
+    color: #667eea;
+    margin-bottom: 30px;
+  }
+
+  .winner {
+    text-align: center;
+    font-size: 3em;
+    color: #ffd700;
+    margin-bottom: 30px;
+    animation: winnerShake 1s ease-in-out infinite;
+  }
+
+  @keyframes winnerShake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+  }
+
+  .scoreboard {
+    margin-bottom: 30px;
+  }
+
+  .score-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  }
+
+  .score-item.rank1 {
+    background: linear-gradient(135deg, #ffd89b, #ff9a56);
+    transform: scale(1.05);
+  }
+
+  .score-item.rank2 {
+    background: linear-gradient(135deg, #dfe9f3, #b8c6db);
+  }
+
+  .score-item.rank3 {
+    background: linear-gradient(135deg, #f5d0a9, #d7b899);
+  }
+
+  .score-rank {
+    font-size: 2em;
+    font-weight: bold;
+    margin-right: 20px;
+  }
+
+  .score-player {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+  }
+
+  .score-player-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid white;
+  }
+
+  .score-player-name {
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+
+  .score-points {
+    font-size: 2em;
+    font-weight: bold;
+    color: #667eea;
+  }
+
+  /* ========== 響應式設計 ========== */
+  @media (max-width: 768px) {
+    h1 { font-size: 2em; }
+    .player-card { padding: 10px 15px; }
+    .modal-content { padding: 20px; }
+
+    .floating-button {
+      width: 60px;
+      height: 60px;
+      font-size: 28px;
+      right: 20px;
+      bottom: 20px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🎲 大富翁教學遊戲</h1>
+
+  <!-- ========== 設定頁面 ========== -->
+  <div id="setupPage">
+    <!-- 基本設定 -->
+    <div class="setup-section">
+      <h2>📋 基本設定</h2>
+      <div class="input-group">
+        <label>棋盤格子數量 (建議 20-50 格)</label>
+        <input type="number" id="cellCount" min="20" max="50" value="30">
+      </div>
+      <div class="input-group">
+        <label>玩家數量 (2-6 人)</label>
+        <input type="number" id="playerCount" min="2" max="6" value="4">
+      </div>
+      <button class="btn btn-small" onclick="generatePlayerInputs()">產生玩家設定欄位</button>
+    </div>
+
+    <!-- 玩家設定 -->
+    <div class="setup-section">
+      <h2>👥 玩家設定</h2>
+      <div id="playersInputs"></div>
+    </div>
+
+    <!-- 任務設定 -->
+    <div class="setup-section">
+      <h2>📝 任務設定</h2>
+      <div class="input-group">
+        <label>任務數量 (建議 5-15 個)</label>
+        <input type="number" id="taskCount" min="1" max="20" value="8">
+      </div>
+      <div class="input-group">
+        <label>任務成功獲得分數</label>
+        <input type="number" id="taskSuccessScore" min="1" max="100" value="10">
+      </div>
+      <div class="input-group" style="display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="hiddenMode" style="width: auto; margin: 0;">
+        <label style="margin: 0; cursor: pointer;" for="hiddenMode">啟用隱藏模式（格子在玩家走過前為迷霧遮蓋）</label>
+      </div>
+      <button class="btn btn-small" onclick="generateTaskInputs()">產生任務輸入欄位</button>
+      <div id="tasksInputs" style="margin-top: 15px;"></div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+      <button class="btn" onclick="startGame()">🚀 開始遊戲</button>
+      <button class="btn btn-small" onclick="exportSettings()" style="background: linear-gradient(135deg, #11998e, #38ef7d);">📤 匯出設定</button>
+      <button class="btn btn-small" onclick="document.getElementById('importFile').click()" style="background: linear-gradient(135deg, #eb3349, #f45c43);">📥 匯入設定</button>
+      <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importSettings(event)">
+    </div>
+  </div>
+
+  <!-- ========== 遊戲頁面 ========== -->
+  <div id="gamePage">
+    <!-- 浮動按鈕 -->
+    <button class="floating-button" onclick="toggleSidebar()">🎲</button>
+
+    <!-- 遮罩層 -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- 主要遊戲區 -->
+    <div class="game-main">
+      <!-- 棋盤 -->
+      <div id="boardContainer">
+        <div id="board"></div>
+      </div>
+
+      <!-- 骰子控制側邊欄 -->
+      <div class="dice-control" id="diceControlSidebar">
+        <!-- 固定區域：骰子 -->
+        <div class="dice-control-fixed">
+          <div class="dice-control-header">
+            <h3 style="margin: 0; color: #667eea;">遊戲控制</h3>
+            <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
+          </div>
+
+          <div id="diceDisplay" onclick="rollDice()"></div>
+          <div style="text-align: center; color: #999; font-size: 0.9em; margin-top: -5px;">點擊骰子擲骰</div>
+          <div id="turnInfo" style="margin-top: 15px; font-size: 1em; font-weight: bold; line-height: 1.5; text-align: center;"></div>
+
+          <div style="border-top: 2px solid #e0e0e0; margin: 20px 0;"></div>
+          <h3 style="margin: 0 0 15px 0; color: #667eea;">玩家狀態</h3>
+        </div>
+
+        <!-- 可滾動區域：玩家狀態 -->
+        <div class="dice-control-scrollable">
+          <div class="players-info-compact" id="playersInfo"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 任務彈窗 ========== -->
+  <div id="taskModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">🎯 任務挑戰</div>
+      <div class="modal-body" id="taskText"></div>
+      <div class="modal-footer">
+        <button class="btn btn-success" onclick="completeTask(true)">✅ 完成</button>
+        <button class="btn btn-danger" onclick="completeTask(false)">❌ 失敗</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 結果頁面 ========== -->
+  <div id="resultPage">
+    <div class="result-title">🏆 遊戲結束</div>
+    <div class="winner" id="winnerText"></div>
+    <div class="scoreboard" id="scoreboard"></div>
+    <div style="text-align: center;">
+      <button class="btn" onclick="location.reload()">🔄 重新開始</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== 遊戲狀態 ==========
+let gameConfig = {
+  cellCount: 30,
+  playerCount: 4,
+  taskSuccessScore: 10,
+  tasks: [],
+  hiddenMode: false
+};
+
+let players = [];
+let currentPlayerIndex = 0;
+let board = [];
+let isRolling = false;
+let visitedCells = new Set(); // 追蹤已訪問過的格子
+let diceStats = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}; // 骰子統計
+
+// ========== 顏色配置 ==========
+const PLAYER_COLORS = [
+  '#E53935', // 深紅色
+  '#1976D2', // 深藍色
+  '#388E3C', // 深綠色
+  '#F57C00', // 深橘色
+  '#7B1FA2', // 深紫色
+  '#0097A7', // 深青色
+  '#FF1744', // 鮮紅色
+  '#F50057', // 玫瑰紅
+  '#D500F9', // 紫紅色
+  '#651FFF', // 深紫色
+  '#3D5AFE', // 靛藍色
+  '#2979FF', // 藍色
+  '#00B0FF', // 淺藍色
+  '#00E5FF', // 青色
+  '#1DE9B6', // 翠綠色
+  '#00E676', // 綠色
+  '#76FF03', // 亮綠色
+  '#C6FF00', // 檸檬綠
+  '#FFEA00', // 黃色
+  '#FFC400', // 琥珀色
+  '#FF9100', // 橘色
+  '#FF3D00', // 深橘色
+  '#DD2C00', // 暗紅色
+  '#FF6E40', // 淺橘色
+  '#FF5252', // 紅色
+  '#E040FB', // 紫色
+  '#7C4DFF', // 紫羅蘭色
+  '#536DFE', // 藍紫色
+  '#448AFF', // 天藍色
+  '#40C4FF'  // 淺藍色
+];
+
+// ========== 預設任務範例 ==========
+const DEFAULT_TASKS = [
+  '唱一首歌給大家聽',
+  '做 10 個深蹲',
+  '說出 5 個英文單字',
+  '模仿一種動物的叫聲',
+  '背誦九九乘法表其中一段',
+  '用英文自我介紹',
+  '說一個冷笑話',
+  '跳繩 20 下',
+  '做 5 個伏地挺身',
+  '說出今天學到的一件事',
+  '畫一個簡單的圖案',
+  '用一隻手寫出自己的名字',
+  '倒數從 10 數到 1',
+  '做一個有趣的表情並拍照',
+  '說出 3 種水果的英文',
+  '走到教室最遠的角落再走回來',
+  '跟大家分享一個夢想',
+  '做 10 秒的平板支撐',
+  '說出圓周率前 5 位數字',
+  '用身體比出一個字母',
+  '回答一個數學問題：7 × 8 = ?',
+  '說出 5 個顏色的名稱',
+  '模仿老師說話的樣子',
+  '在空中寫出自己的名字',
+  '說出今天的日期和星期幾'
+];
+
+// ========== 初始化函數 ==========
+function generatePlayerInputs() {
+  const count = parseInt(document.getElementById('playerCount').value);
+  gameConfig.playerCount = count;
+
+  const container = document.getElementById('playersInputs');
+  container.innerHTML = '';
+
+  for (let i = 0; i < count; i++) {
+    const div = document.createElement('div');
+    div.className = 'player-input';
+
+    // 建立顏色選擇器
+    const colorPickerHtml = `
+      <div class="color-picker" id="colorPicker${i}">
+        ${PLAYER_COLORS.map((color, index) =>
+          `<div class="color-option ${index === i ? 'selected' : ''}"
+                style="background: ${color}"
+                data-player="${i}"
+                data-color="${color}"></div>`
+        ).join('')}
+      </div>
+    `;
+
+    div.innerHTML = `
+      <div class="player-color" id="playerColor${i}" style="background: ${PLAYER_COLORS[i]}"
+           onclick="toggleColorPicker(${i})" title="點擊選擇顏色"></div>
+      <div class="player-info">
+        <input type="text" placeholder="玩家 ${i + 1} 的名稱" id="playerName${i}" value="玩家 ${i + 1}">
+        ${colorPickerHtml}
+      </div>
+    `;
+    container.appendChild(div);
+  }
+
+  // 綁定顏色選項點擊事件
+  document.querySelectorAll('.color-option').forEach(option => {
+    option.addEventListener('click', function() {
+      const playerIndex = parseInt(this.dataset.player);
+      const color = this.dataset.color;
+      selectColor(playerIndex, color, this);
+    });
+  });
+}
+
+function toggleColorPicker(playerIndex) {
+  const picker = document.getElementById(`colorPicker${playerIndex}`);
+  // 關閉其他所有選色器
+  document.querySelectorAll('.color-picker').forEach(p => {
+    if (p.id !== `colorPicker${playerIndex}`) {
+      p.classList.remove('active');
+    }
+  });
+  // 切換當前選色器
+  picker.classList.toggle('active');
+}
+
+function selectColor(playerIndex, color, optionElement) {
+  // 更新玩家顏色圓圈
+  document.getElementById(`playerColor${playerIndex}`).style.background = color;
+
+  // 更新選中狀態
+  const picker = document.getElementById(`colorPicker${playerIndex}`);
+  picker.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+  optionElement.classList.add('selected');
+
+  // 關閉選色器
+  picker.classList.remove('active');
+}
+
+function generateTaskInputs() {
+  const count = parseInt(document.getElementById('taskCount').value);
+  const container = document.getElementById('tasksInputs');
+  container.innerHTML = '';
+
+  // 嘗試從 localStorage 載入任務
+  const savedTasks = loadTasksFromStorage();
+
+  // 隨機打亂預設任務
+  const shuffledTasks = [...DEFAULT_TASKS].sort(() => Math.random() - 0.5);
+
+  for (let i = 0; i < count; i++) {
+    const div = document.createElement('div');
+    div.className = 'task-item';
+    // 優先使用已儲存的任務，否則使用隨機任務
+    const defaultTask = (savedTasks && savedTasks[i]) || shuffledTasks[i % shuffledTasks.length];
+    div.innerHTML = `
+      <label><strong>任務 ${i + 1}</strong> (最多 100 字)</label>
+      <textarea id="task${i}" maxlength="100" placeholder="例如：唱一首歌、做 10 個深蹲、回答一個問題等...">${defaultTask}</textarea>
+    `;
+    container.appendChild(div);
+  }
+}
+
+// 儲存任務到 localStorage
+function saveTasksToStorage() {
+  const taskCount = parseInt(document.getElementById('taskCount').value);
+  const tasks = [];
+
+  for (let i = 0; i < taskCount; i++) {
+    const taskInput = document.getElementById(`task${i}`);
+    if (taskInput) {
+      tasks.push(taskInput.value);
+    }
+  }
+
+  localStorage.setItem('monopolyGameTasks', JSON.stringify(tasks));
+  localStorage.setItem('monopolyGameTaskCount', taskCount);
+}
+
+// 從 localStorage 載入任務
+function loadTasksFromStorage() {
+  try {
+    const savedTasks = localStorage.getItem('monopolyGameTasks');
+    return savedTasks ? JSON.parse(savedTasks) : null;
+  } catch (e) {
+    console.error('載入任務失敗:', e);
+    return null;
+  }
+}
+
+function startGame() {
+  // 收集設定
+  gameConfig.cellCount = parseInt(document.getElementById('cellCount').value);
+  gameConfig.playerCount = parseInt(document.getElementById('playerCount').value);
+  gameConfig.taskSuccessScore = parseInt(document.getElementById('taskSuccessScore').value);
+  gameConfig.hiddenMode = document.getElementById('hiddenMode').checked;
+
+  // 重置已訪問格子（起點預設為已訪問）
+  visitedCells = new Set([0]);
+
+  // 收集玩家
+  players = [];
+  for (let i = 0; i < gameConfig.playerCount; i++) {
+    const nameInput = document.getElementById(`playerName${i}`);
+    const colorElement = document.getElementById(`playerColor${i}`);
+    if (!nameInput) {
+      alert('請先點擊「產生玩家設定欄位」按鈕');
+      return;
+    }
+    players.push({
+      name: nameInput.value || `玩家 ${i + 1}`,
+      color: colorElement ? colorElement.style.background : PLAYER_COLORS[i],
+      position: 0,
+      score: 0
+    });
+  }
+
+  // 收集任務
+  gameConfig.tasks = [];
+  const taskCount = parseInt(document.getElementById('taskCount').value);
+  for (let i = 0; i < taskCount; i++) {
+    const taskInput = document.getElementById(`task${i}`);
+    if (!taskInput) {
+      alert('請先點擊「產生任務輸入欄位」按鈕');
+      return;
+    }
+    const taskText = taskInput.value.trim();
+    if (taskText) {
+      gameConfig.tasks.push(taskText);
+    }
+  }
+
+  if (gameConfig.tasks.length === 0) {
+    alert('請至少輸入一個任務！');
+    return;
+  }
+
+  // 儲存任務到 localStorage
+  saveTasksToStorage();
+
+  // 初始化棋盤
+  initBoard();
+
+  // 切換到遊戲頁面
+  document.getElementById('setupPage').style.display = 'none';
+  document.getElementById('gamePage').style.display = 'block';
+
+  // 渲染遊戲
+  renderPlayersInfo();
+  renderBoard();
+  updateTurnInfo();
+
+  // 初始化骰子顯示
+  const diceDisplay = document.getElementById('diceDisplay');
+  const initialDice = createDice(1);
+  diceDisplay.innerHTML = '';
+  diceDisplay.appendChild(initialDice);
+
+  // 滾動到起點位置，讓玩家看到所有人在哪裡
+  setTimeout(() => {
+    scrollToCurrentPlayer();
+  }, 100);
+}
+
+function initBoard() {
+  board = [];
+  const taskPositions = new Set();
+
+  // 隨機分配任務位置（避開起點和終點）
+  const availablePositions = [];
+  for (let i = 1; i < gameConfig.cellCount - 1; i++) {
+    availablePositions.push(i);
+  }
+
+  // 隨機選擇任務位置
+  const taskCount = Math.min(gameConfig.tasks.length, availablePositions.length);
+  for (let i = 0; i < taskCount; i++) {
+    const randomIndex = Math.floor(Math.random() * availablePositions.length);
+    taskPositions.add(availablePositions[randomIndex]);
+    availablePositions.splice(randomIndex, 1);
+  }
+
+  // 建立棋盤
+  for (let i = 0; i < gameConfig.cellCount; i++) {
+    if (i === 0) {
+      board.push({ type: 'start', task: null });
+    } else if (i === gameConfig.cellCount - 1) {
+      board.push({ type: 'finish', task: null });
+    } else if (taskPositions.has(i)) {
+      const randomTask = gameConfig.tasks[Math.floor(Math.random() * gameConfig.tasks.length)];
+      board.push({ type: 'task', task: randomTask });
+    } else {
+      board.push({ type: 'normal', task: null });
+    }
+  }
+}
+
+function renderPlayersInfo() {
+  const container = document.getElementById('playersInfo');
+  container.innerHTML = '';
+
+  players.forEach((player, index) => {
+    const card = document.createElement('div');
+    card.className = 'player-card' + (index === currentPlayerIndex ? ' active' : '');
+    card.innerHTML = `
+      <div class="player-card-header">
+        <div class="player-icon" style="background: ${player.color}"></div>
+        <div class="player-name">${player.name}</div>
+      </div>
+      <div class="player-score">${player.score} 分</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function renderBoard() {
+  const boardDiv = document.getElementById('board');
+  boardDiv.innerHTML = '';
+
+  // 計算蛇形佈局的行列
+  // 手機版時減少列數，避免爆版
+  const isMobile = window.innerWidth <= 768;
+  let cols;
+
+  if (isMobile) {
+    // 手機版：固定 4 列
+    cols = Math.min(4, Math.ceil(Math.sqrt(gameConfig.cellCount)));
+  } else {
+    // 桌面版：使用平方根計算
+    cols = Math.ceil(Math.sqrt(gameConfig.cellCount));
+  }
+
+  const rows = Math.ceil(gameConfig.cellCount / cols);
+
+  boardDiv.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+  // 蛇形排列
+  const snakeOrder = [];
+  for (let row = rows - 1; row >= 0; row--) {
+    if ((rows - 1 - row) % 2 === 0) {
+      // 從左到右
+      for (let col = 0; col < cols; col++) {
+        const index = row * cols + col;
+        if (index < gameConfig.cellCount) {
+          snakeOrder.push(index);
+        }
+      }
+    } else {
+      // 從右到左
+      for (let col = cols - 1; col >= 0; col--) {
+        const index = row * cols + col;
+        if (index < gameConfig.cellCount) {
+          snakeOrder.push(index);
+        }
+      }
+    }
+  }
+
+  // 反轉順序（從下往上）
+  snakeOrder.reverse();
+
+  // 創建格子
+  snakeOrder.forEach((cellIndex, displayIndex) => {
+    const cell = board[cellIndex];
+    const div = document.createElement('div');
+    div.className = 'cell';
+
+    // 計算這個格子在第幾行（從下往上）
+    const row = Math.floor(displayIndex / cols);
+    const col = displayIndex % cols;
+    const isRightToLeft = row % 2 === 1;
+    const isLastRowIncomplete = gameConfig.cellCount % cols !== 0 && row === rows - 1;
+
+    // 如果是最後一行且不完整，需要調整grid位置
+    if (isLastRowIncomplete) {
+      const cellsInLastRow = gameConfig.cellCount % cols;
+      if (!isRightToLeft) {
+        // 從左到右的行，靠右對齊
+        div.style.gridColumnStart = cols - cellsInLastRow + col + 1;
+      }
+      // 從右到左的行，自然靠右對齊，不需要額外設定
+    }
+
+    // 檢查是否需要迷霧遮蓋（隱藏模式且該格子未被訪問）
+    const isFogCovered = gameConfig.hiddenMode && !visitedCells.has(cellIndex);
+
+    if (cell.type === 'start') {
+      div.classList.add('start');
+      div.innerHTML = `<div class="cell-number">${cellIndex}</div><div>🏠 起點</div>`;
+    } else if (cell.type === 'finish') {
+      div.classList.add('finish');
+      div.innerHTML = `<div class="cell-number">${cellIndex}</div><div>🏁 終點</div>`;
+    } else if (cell.type === 'task') {
+      div.classList.add('has-task');
+      div.innerHTML = `<div class="cell-number">${cellIndex}</div><div style="font-size: 2.5em;">📋</div>`;
+    } else {
+      div.innerHTML = `<div class="cell-number">${cellIndex}</div>`;
+    }
+
+    // 添加迷霧遮蓋樣式
+    if (isFogCovered) {
+      div.classList.add('fog-covered');
+    }
+
+    // 添加當前格子高亮
+    players.forEach(player => {
+      if (player.position === cellIndex) {
+        div.classList.add('current');
+      }
+    });
+
+    // 添加玩家標記
+    const playersDiv = document.createElement('div');
+    playersDiv.className = 'cell-players';
+    players.forEach(player => {
+      if (player.position === cellIndex) {
+        const token = document.createElement('div');
+        token.className = 'player-token';
+        token.style.background = player.color;
+        token.title = player.name;
+        token.textContent = player.name.charAt(0); // 顯示名稱第一個字
+        playersDiv.appendChild(token);
+      }
+    });
+    div.appendChild(playersDiv);
+
+    boardDiv.appendChild(div);
+  });
+}
+
+function updateTurnInfo() {
+  const info = document.getElementById('turnInfo');
+  info.innerHTML = `輪到 <span style="color: ${players[currentPlayerIndex].color}">${players[currentPlayerIndex].name}</span> 擲骰子`;
+}
+
+function scrollToCurrentPlayer() {
+  const player = players[currentPlayerIndex];
+  const boardCells = document.querySelectorAll('#board .cell');
+
+  if (boardCells && boardCells.length > player.position) {
+    const currentCell = boardCells[player.position];
+    if (currentCell) {
+      currentCell.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center'
+      });
+    }
+  }
+}
+
+// ========== 3D 骰子函數 ==========
+function createDice(number) {
+  const dice = document.createElement('div');
+  dice.className = 'dice-3d';
+
+  // 骰子的 6 個面
+  const faces = [
+    { name: 'front', dots: 1 },
+    { name: 'back', dots: 6 },
+    { name: 'right', dots: 3 },
+    { name: 'left', dots: 4 },
+    { name: 'top', dots: 5 },
+    { name: 'bottom', dots: 2 }
+  ];
+
+  faces.forEach(face => {
+    const faceDiv = document.createElement('div');
+    faceDiv.className = `dice-face ${face.name} face-${face.dots}`;
+
+    // 根據點數添加圓點
+    for (let i = 0; i < face.dots; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dice-dot';
+      faceDiv.appendChild(dot);
+    }
+
+    dice.appendChild(faceDiv);
+  });
+
+  return dice;
+}
+
+function getDiceRotation(number) {
+  // 根據點數返回對應的旋轉角度
+  const rotations = {
+    1: 'rotateX(0deg) rotateY(0deg)',      // 正面 = 1
+    2: 'rotateX(90deg) rotateY(0deg)',     // 頂部 = 5 (要顯示底部2)
+    3: 'rotateX(0deg) rotateY(-90deg)',    // 左側 = 4 (要顯示右側3)
+    4: 'rotateX(0deg) rotateY(90deg)',     // 右側 = 3 (要顯示左側4)
+    5: 'rotateX(-90deg) rotateY(0deg)',    // 底部 = 2 (要顯示頂部5)
+    6: 'rotateX(0deg) rotateY(180deg)'     // 背面 = 6
+  };
+  return rotations[number];
+}
+
+// ========== 遊戲邏輯 ==========
+function rollDice() {
+  if (isRolling) return;
+  isRolling = true;
+
+  // 禁用骰子點擊
+  const diceDisplay = document.getElementById('diceDisplay');
+  diceDisplay.classList.add('disabled');
+
+  // 建立 3D 骰子
+  const dice = createDice(1);
+  diceDisplay.innerHTML = '';
+  diceDisplay.appendChild(dice);
+
+  // 添加滾動動畫
+  dice.classList.add('rolling');
+
+  // 隨機最終點數
+  const finalNumber = Math.floor(Math.random() * 6) + 1;
+
+  // 統計骰子結果
+  diceStats[finalNumber]++;
+  const totalRolls = Object.values(diceStats).reduce((a, b) => a + b, 0);
+  console.log(`骰子結果: ${finalNumber} | 統計:`, diceStats, `| 總次數: ${totalRolls}`);
+
+  // 動畫結束後顯示結果（0.6秒）
+  setTimeout(() => {
+    dice.classList.remove('rolling');
+    dice.style.transform = getDiceRotation(finalNumber);
+
+    // 短暫延遲後關閉側邊欄並移動玩家
+    setTimeout(() => {
+      // 關閉側邊欄
+      toggleSidebar();
+
+      // 再延遲一下讓側邊欄動畫完成後才移動玩家和滾動到位置
+      setTimeout(() => {
+        // 先滾動到當前玩家位置
+        scrollToCurrentPlayer();
+
+        // 稍微延遲後開始移動玩家
+        setTimeout(() => {
+          movePlayer(finalNumber);
+        }, 200);
+      }, 300);
+    }, 400);
+  }, 600);
+}
+
+function movePlayer(steps) {
+  const player = players[currentPlayerIndex];
+  const targetPosition = Math.min(player.position + steps, gameConfig.cellCount - 1);
+
+  // 逐步移動動畫
+  let currentStep = 0;
+  const moveInterval = setInterval(() => {
+    if (currentStep < steps && player.position < gameConfig.cellCount - 1) {
+      player.position++;
+
+      // 玩家經過的格子都標記為已訪問（移除迷霧）
+      visitedCells.add(player.position);
+
+      renderBoard();
+      renderPlayersInfo();
+      currentStep++;
+    } else {
+      clearInterval(moveInterval);
+
+      // 檢查是否到達終點
+      if (player.position >= gameConfig.cellCount - 1) {
+        setTimeout(() => showResults(), 1000);
+      } else {
+        // 檢查是否有任務
+        const cell = board[player.position];
+        if (cell.type === 'task' && cell.task) {
+          setTimeout(() => showTask(cell.task), 500);
+        } else {
+          setTimeout(() => nextTurn(), 1000);
+        }
+      }
+    }
+  }, 300);
+}
+
+function showTask(taskText) {
+  const player = players[currentPlayerIndex];
+  document.getElementById('taskText').innerHTML = `
+    <strong>${player.name}</strong> 的任務：<br><br>
+    ${taskText}
+  `;
+  document.getElementById('taskModal').classList.add('active');
+}
+
+function completeTask(success) {
+  document.getElementById('taskModal').classList.remove('active');
+
+  if (success) {
+    players[currentPlayerIndex].score += gameConfig.taskSuccessScore;
+    renderPlayersInfo();
+  }
+
+  setTimeout(() => nextTurn(), 500);
+}
+
+function nextTurn() {
+  currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+  renderPlayersInfo();
+  updateTurnInfo();
+
+  // 啟用骰子點擊
+  const diceDisplay = document.getElementById('diceDisplay');
+  diceDisplay.classList.remove('disabled');
+  isRolling = false;
+}
+
+// ========== 結果顯示 ==========
+function showResults() {
+  document.getElementById('gamePage').style.display = 'none';
+  document.getElementById('resultPage').style.display = 'block';
+
+  // 排序玩家
+  const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+
+  // 顯示冠軍
+  document.getElementById('winnerText').textContent = `🎉 ${sortedPlayers[0].name} 獲勝！ 🎉`;
+
+  // 顯示計分板
+  const scoreboard = document.getElementById('scoreboard');
+  scoreboard.innerHTML = '';
+
+  sortedPlayers.forEach((player, index) => {
+    const item = document.createElement('div');
+    item.className = 'score-item';
+    if (index === 0) item.classList.add('rank1');
+    else if (index === 1) item.classList.add('rank2');
+    else if (index === 2) item.classList.add('rank3');
+
+    const medals = ['🥇', '🥈', '🥉'];
+    const medal = medals[index] || '🏅';
+
+    item.innerHTML = `
+      <div class="score-rank">${medal}</div>
+      <div class="score-player">
+        <div class="score-player-icon" style="background: ${player.color}"></div>
+        <div class="score-player-name">${player.name}</div>
+      </div>
+      <div class="score-points">${player.score} 分</div>
+    `;
+    scoreboard.appendChild(item);
+  });
+}
+
+// ========== 匯出/匯入設定 ==========
+function exportSettings() {
+  // 收集當前所有設定
+  const settings = {
+    version: '1.0',
+    cellCount: parseInt(document.getElementById('cellCount').value),
+    playerCount: parseInt(document.getElementById('playerCount').value),
+    taskCount: parseInt(document.getElementById('taskCount').value),
+    taskSuccessScore: parseInt(document.getElementById('taskSuccessScore').value),
+    hiddenMode: document.getElementById('hiddenMode').checked,
+    tasks: []
+  };
+
+  // 收集任務
+  const taskCount = parseInt(document.getElementById('taskCount').value);
+  for (let i = 0; i < taskCount; i++) {
+    const taskInput = document.getElementById(`task${i}`);
+    if (taskInput) {
+      settings.tasks.push(taskInput.value.trim());
+    }
+  }
+
+  // 產生 JSON 檔案
+  const dataStr = JSON.stringify(settings, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+  // 建立下載連結
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `大富翁遊戲設定_${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  alert('設定已匯出！');
+}
+
+function importSettings(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const settings = JSON.parse(e.target.result);
+
+      // 驗證設定檔格式
+      if (!settings.version || !settings.tasks) {
+        alert('設定檔格式錯誤！');
+        return;
+      }
+
+      // 套用設定
+      if (settings.cellCount) document.getElementById('cellCount').value = settings.cellCount;
+      if (settings.playerCount) {
+        document.getElementById('playerCount').value = settings.playerCount;
+        generatePlayerInputs();
+      }
+      if (settings.taskCount) document.getElementById('taskCount').value = settings.taskCount;
+      if (settings.taskSuccessScore) document.getElementById('taskSuccessScore').value = settings.taskSuccessScore;
+      if (settings.hiddenMode !== undefined) document.getElementById('hiddenMode').checked = settings.hiddenMode;
+
+      // 產生任務欄位並填入任務
+      generateTaskInputs();
+
+      // 填入任務內容
+      setTimeout(() => {
+        settings.tasks.forEach((task, i) => {
+          const taskInput = document.getElementById(`task${i}`);
+          if (taskInput) {
+            taskInput.value = task;
+          }
+        });
+      }, 100);
+
+      alert('設定已成功匯入！');
+    } catch (error) {
+      alert('匯入失敗：設定檔格式錯誤！\n' + error.message);
+    }
+  };
+  reader.readAsText(file);
+
+  // 重置檔案輸入，允許重複匯入相同檔案
+  event.target.value = '';
+}
+
+// ========== 側邊欄控制 ==========
+function toggleSidebar() {
+  const sidebar = document.getElementById('diceControlSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const floatingBtn = document.querySelector('.floating-button');
+
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('active');
+
+  if (sidebar.classList.contains('open')) {
+    floatingBtn.classList.add('hidden');
+
+    // 打開側邊欄時，等待滑出動畫完成後再滾動到當前玩家位置
+    setTimeout(() => {
+      const scrollContainer = document.querySelector('.dice-control-scrollable');
+      const activeCard = document.querySelector('.player-card.active');
+
+      if (scrollContainer && activeCard) {
+        // 使用 scrollIntoView 讓當前玩家卡片顯示在可見區域
+        activeCard.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
+        });
+      }
+    }, 350); // 等待側邊欄滑出動畫完成（側邊欄動畫是 0.3s）
+  } else {
+    floatingBtn.classList.remove('hidden');
+  }
+}
+
+// ========== 初始化 ==========
+window.onload = function() {
+  // 載入上次儲存的任務數量
+  const savedTaskCount = localStorage.getItem('monopolyGameTaskCount');
+  if (savedTaskCount) {
+    document.getElementById('taskCount').value = savedTaskCount;
+  }
+
+  generatePlayerInputs();
+  generateTaskInputs();
+};
+
+// 視窗大小改變時重新渲染棋盤（處理手機旋轉等情況）
+let resizeTimeout;
+window.addEventListener('resize', function() {
+  // 使用防抖，避免頻繁重新渲染
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    // 只在遊戲進行中才重新渲染
+    if (document.getElementById('gamePage').style.display !== 'none') {
+      renderBoard();
+    }
+  }, 300);
+});
+</script>
+
+</body>
+</html>
