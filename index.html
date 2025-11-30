@@ -17,7 +17,7 @@
 <meta property="og:url" content="https://your-domain.com/">
 <meta property="og:title" content="🎲 大富翁教學遊戲 | 課堂互動遊戲">
 <meta property="og:description" content="專為課堂教學設計的互動式大富翁遊戲，支援 2-6 人遊玩，讓學習變得更有趣！">
-<meta property="og:image" content="https://your-domain.com/preview.png">
+<meta property="og:image" content="./screenshots/preview.png">
 <meta property="og:site_name" content="大富翁教學遊戲">
 <meta property="og:locale" content="zh_TW">
 
@@ -26,7 +26,7 @@
 <meta property="twitter:url" content="https://your-domain.com/">
 <meta property="twitter:title" content="🎲 大富翁教學遊戲 | 課堂互動遊戲">
 <meta property="twitter:description" content="專為課堂教學設計的互動式大富翁遊戲，支援 2-6 人遊玩，讓學習變得更有趣！">
-<meta property="twitter:image" content="https://your-domain.com/preview.png">
+<meta property="twitter:image" content="./screenshots/preview.png">
 
 <!-- Favicon -->
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
@@ -91,6 +91,19 @@
   .container {
     max-width: 1400px;
     margin: 0 auto;
+  }
+
+  .seo-preview {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+
+  .seo-preview img {
+    width: min(100%, 900px);
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+    border: 4px solid rgba(255, 255, 255, 0.8);
   }
 
   h1 {

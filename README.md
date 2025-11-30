@@ -2,7 +2,7 @@
 
 一款專為課堂教學設計的互動式大富翁遊戲，讓學生透過遊戲完成真實任務，寓教於樂！
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
@@ -299,9 +299,6 @@ A: 可以！遊戲支援響應式設計，在手機、平板、電腦上都能�
 
 ### Q: 迷霧模式是什麼？
 A: 啟用後，玩家未走過的格子會被迷霧遮蓋，增加探索的驚喜感。
-
-### Q: 可以用在商業用途嗎？
-A: 可以！本專案採用 MIT 授權，可自由使用、修改、分發。
 
 ## 📧 聯絡資訊
 
