@@ -331,6 +331,49 @@
     transform: translateY(-1px);
   }
 
+  .task-points-input {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .task-points-input label {
+    font-size: 0.9em;
+    color: #666;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .task-points-input input[type="number"] {
+    width: 80px;
+    padding: 8px 12px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  }
+
+  .task-points-input input[type="number"]:hover {
+    border-color: #c1c9d2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .task-points-input input[type="number"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .task-points-input span {
+    font-size: 0.9em;
+    color: #666;
+  }
+
   .btn {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
@@ -875,6 +918,8 @@
     padding: 40px;
     max-width: 600px;
     width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 10px 50px rgba(0,0,0,0.5);
     animation: slideUp 0.4s ease-out;
   }
@@ -891,10 +936,10 @@
   }
 
   .modal-header {
-    font-size: 2em;
+    font-size: 1.8em;
     font-weight: bold;
     color: #667eea;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-align: center;
   }
 
@@ -913,6 +958,169 @@
     display: flex;
     gap: 15px;
     justify-content: center;
+  }
+
+  /* ========== 抽卡樣式 ========== */
+  .card-container {
+    perspective: 1000px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .card {
+    width: 350px;
+    height: 250px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .card:hover {
+    transform: scale(1.02);
+  }
+
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+  }
+
+  .card.flipped .card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .card-front,
+  .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .card-front {
+    background:
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+      linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    z-index: 2;
+  }
+
+  .card.flipped .card-front {
+    z-index: 0;
+  }
+
+  /* 卡片背面花紋 */
+  .card-front::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 15px,
+      rgba(255, 255, 255, 0.05) 15px,
+      rgba(255, 255, 255, 0.05) 30px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 15px,
+      rgba(255, 255, 255, 0.05) 15px,
+      rgba(255, 255, 255, 0.05) 30px
+    );
+    border-radius: 10px;
+  }
+
+  .card-back {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    transform: rotateY(180deg);
+    color: white;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+
+  .card.flipped .card-back {
+    z-index: 2;
+  }
+
+  .card-back-pattern {
+    text-align: center;
+    padding: 30px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-icon {
+    font-size: 80px;
+    margin-bottom: 10px;
+    animation: cardFloat 2s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  }
+
+  @keyframes cardFloat {
+    0%, 100% {
+      transform: translateY(0px) rotate(-5deg);
+    }
+    50% {
+      transform: translateY(-15px) rotate(5deg);
+    }
+  }
+
+  .card-hint {
+    font-size: 20px;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+  }
+
+  .card-task-content {
+    padding: 30px 25px;
+    font-size: 1.1em;
+    line-height: 1.6;
+    text-align: center;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .card-task-content strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+  }
+
+  .card.flipped {
+    pointer-events: none;
   }
 
   /* ========== 結果頁面 ========== */
@@ -1011,6 +1219,29 @@
     h1 { font-size: 2em; }
     .player-card { padding: 10px 15px; }
     .modal-content { padding: 20px; }
+
+    .card {
+      width: 280px;
+      height: 200px;
+    }
+
+    .card-icon {
+      font-size: 60px;
+    }
+
+    .card-hint {
+      font-size: 16px;
+    }
+
+    .card-task-content {
+      padding: 20px 15px;
+      font-size: 0.95em;
+    }
+
+    .card-task-content strong {
+      font-size: 1.1em;
+      margin-bottom: 8px;
+    }
 
     .floating-button {
       width: 60px;
@@ -1120,8 +1351,25 @@
   <div id="taskModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">🎯 任務挑戰</div>
-      <div class="modal-body" id="taskText"></div>
-      <div class="modal-footer">
+
+      <!-- 抽卡區域 -->
+      <div class="card-container" id="cardContainer">
+        <div class="card" id="taskCard" onclick="flipCard()">
+          <div class="card-inner">
+            <div class="card-front">
+              <div class="card-back-pattern">
+                <div class="card-icon">🃏</div>
+                <div class="card-hint">點擊抽卡</div>
+              </div>
+            </div>
+            <div class="card-back">
+              <div class="card-task-content" id="taskText"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" id="taskButtons" style="display: none;">
         <button class="btn btn-success" onclick="completeTask(true)">✅ 完成</button>
         <button class="btn btn-danger" onclick="completeTask(false)">❌ 失敗</button>
       </div>
@@ -1155,6 +1403,8 @@ let board = [];
 let isRolling = false;
 let visitedCells = new Set(); // 追蹤已訪問過的格子
 let diceStats = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}; // 骰子統計
+let usedTasks = new Set(); // 追蹤已使用的任務
+let availableTasks = []; // 可用的任務池
 
 // ========== 顏色配置 ==========
 const PLAYER_COLORS = [
@@ -1304,10 +1554,18 @@ function generateTaskInputs() {
     const div = document.createElement('div');
     div.className = 'task-item';
     // 優先使用已儲存的任務，否則使用隨機任務
-    const defaultTask = (savedTasks && savedTasks[i]) || shuffledTasks[i % shuffledTasks.length];
+    const savedTask = savedTasks && savedTasks[i];
+    const defaultTaskText = savedTask?.text || shuffledTasks[i % shuffledTasks.length];
+    const defaultTaskPoints = savedTask?.points || 10;
+
     div.innerHTML = `
       <label><strong>任務 ${i + 1}</strong> (最多 100 字)</label>
-      <textarea id="task${i}" maxlength="100" placeholder="例如：唱一首歌、做 10 個深蹲、回答一個問題等...">${defaultTask}</textarea>
+      <textarea id="task${i}" maxlength="100" placeholder="例如：唱一首歌、做 10 個深蹲、回答一個問題等...">${defaultTaskText}</textarea>
+      <div class="task-points-input">
+        <label>完成分數：</label>
+        <input type="number" id="taskPoints${i}" min="1" max="100" value="${defaultTaskPoints}" placeholder="分數">
+        <span>分</span>
+      </div>
     `;
     container.appendChild(div);
   }
@@ -1320,8 +1578,12 @@ function saveTasksToStorage() {
 
   for (let i = 0; i < taskCount; i++) {
     const taskInput = document.getElementById(`task${i}`);
+    const pointsInput = document.getElementById(`taskPoints${i}`);
     if (taskInput) {
-      tasks.push(taskInput.value);
+      tasks.push({
+        text: taskInput.value,
+        points: pointsInput ? parseInt(pointsInput.value) || 10 : 10
+      });
     }
   }
 
@@ -1333,7 +1595,16 @@ function saveTasksToStorage() {
 function loadTasksFromStorage() {
   try {
     const savedTasks = localStorage.getItem('monopolyGameTasks');
-    return savedTasks ? JSON.parse(savedTasks) : null;
+    if (!savedTasks) return null;
+
+    const tasks = JSON.parse(savedTasks);
+    // 兼容舊格式（純字串陣列）
+    return tasks.map(task => {
+      if (typeof task === 'string') {
+        return { text: task, points: 10 };
+      }
+      return task;
+    });
   } catch (e) {
     console.error('載入任務失敗:', e);
     return null;
@@ -1372,13 +1643,17 @@ function startGame() {
   const taskCount = parseInt(document.getElementById('taskCount').value);
   for (let i = 0; i < taskCount; i++) {
     const taskInput = document.getElementById(`task${i}`);
+    const pointsInput = document.getElementById(`taskPoints${i}`);
     if (!taskInput) {
       alert('請先點擊「產生任務輸入欄位」按鈕');
       return;
     }
     const taskText = taskInput.value.trim();
     if (taskText) {
-      gameConfig.tasks.push(taskText);
+      gameConfig.tasks.push({
+        text: taskText,
+        points: pointsInput ? parseInt(pointsInput.value) || 10 : 10
+      });
     }
   }
 
@@ -1386,6 +1661,10 @@ function startGame() {
     alert('請至少輸入一個任務！');
     return;
   }
+
+  // 初始化任務池（複製任務列表）
+  availableTasks = [...gameConfig.tasks];
+  usedTasks = new Set();
 
   // 儲存任務到 localStorage
   saveTasksToStorage();
@@ -1432,15 +1711,14 @@ function initBoard() {
     availablePositions.splice(randomIndex, 1);
   }
 
-  // 建立棋盤
+  // 建立棋盤（任務格不預先分配任務，而是在踩到時才抽取）
   for (let i = 0; i < gameConfig.cellCount; i++) {
     if (i === 0) {
       board.push({ type: 'start', task: null });
     } else if (i === gameConfig.cellCount - 1) {
       board.push({ type: 'finish', task: null });
     } else if (taskPositions.has(i)) {
-      const randomTask = gameConfig.tasks[Math.floor(Math.random() * gameConfig.tasks.length)];
-      board.push({ type: 'task', task: randomTask });
+      board.push({ type: 'task', task: null }); // 任務待抽取
     } else {
       board.push({ type: 'normal', task: null });
     }
@@ -1720,8 +1998,10 @@ function movePlayer(steps) {
       } else {
         // 檢查是否有任務
         const cell = board[player.position];
-        if (cell.type === 'task' && cell.task) {
-          setTimeout(() => showTask(cell.task), 500);
+        if (cell.type === 'task') {
+          // 抽取一個新任務
+          const task = getRandomTask();
+          setTimeout(() => showTask(task), 500);
         } else {
           setTimeout(() => nextTurn(), 1000);
         }
@@ -1730,23 +2010,70 @@ function movePlayer(steps) {
   }, 300);
 }
 
-function showTask(taskText) {
+// 從任務池中隨機抽取一個未使用的任務
+function getRandomTask() {
+  // 如果所有任務都用過了，重置任務池
+  if (availableTasks.length === 0) {
+    availableTasks = [...gameConfig.tasks];
+    usedTasks = new Set();
+  }
+
+  // 隨機選擇一個任務
+  const randomIndex = Math.floor(Math.random() * availableTasks.length);
+  const task = availableTasks[randomIndex];
+
+  // 從可用任務中移除
+  availableTasks.splice(randomIndex, 1);
+  usedTasks.add(task);
+
+  return task;
+}
+
+let currentTask = null; // 儲存當前任務物件
+
+function showTask(task) {
   const player = players[currentPlayerIndex];
+  currentTask = task; // 保存任務物件
+
+  // 重置卡片狀態
+  const card = document.getElementById('taskCard');
+  card.classList.remove('flipped');
+
+  // 設定任務內容
   document.getElementById('taskText').innerHTML = `
-    <strong>${player.name}</strong> 的任務：<br><br>
-    ${taskText}
+    <strong>${player.name} 的任務：</strong>
+    <div style="margin-top: 15px; font-size: 1.15em;">${task.text}</div>
+    <div style="margin-top: 10px; font-size: 0.9em; color: rgba(255,255,255,0.9);">完成可得 ${task.points} 分</div>
   `;
+
+  // 隱藏按鈕
+  document.getElementById('taskButtons').style.display = 'none';
+
+  // 顯示彈窗
   document.getElementById('taskModal').classList.add('active');
+}
+
+// 翻牌函數
+function flipCard() {
+  const card = document.getElementById('taskCard');
+  card.classList.add('flipped');
+
+  // 翻牌後顯示按鈕
+  setTimeout(() => {
+    document.getElementById('taskButtons').style.display = 'flex';
+  }, 400);
 }
 
 function completeTask(success) {
   document.getElementById('taskModal').classList.remove('active');
 
-  if (success) {
-    players[currentPlayerIndex].score += gameConfig.taskSuccessScore;
+  if (success && currentTask) {
+    // 使用當前任務的分數
+    players[currentPlayerIndex].score += currentTask.points;
     renderPlayersInfo();
   }
 
+  currentTask = null; // 清空當前任務
   setTimeout(() => nextTurn(), 500);
 }
 
@@ -1815,8 +2142,12 @@ function exportSettings() {
   const taskCount = parseInt(document.getElementById('taskCount').value);
   for (let i = 0; i < taskCount; i++) {
     const taskInput = document.getElementById(`task${i}`);
+    const pointsInput = document.getElementById(`taskPoints${i}`);
     if (taskInput) {
-      settings.tasks.push(taskInput.value.trim());
+      settings.tasks.push({
+        text: taskInput.value.trim(),
+        points: pointsInput ? parseInt(pointsInput.value) || 10 : 10
+      });
     }
   }
 
@@ -1869,8 +2200,16 @@ function importSettings(event) {
       setTimeout(() => {
         settings.tasks.forEach((task, i) => {
           const taskInput = document.getElementById(`task${i}`);
+          const pointsInput = document.getElementById(`taskPoints${i}`);
           if (taskInput) {
-            taskInput.value = task;
+            // 兼容舊格式（純字串）和新格式（物件）
+            if (typeof task === 'string') {
+              taskInput.value = task;
+              if (pointsInput) pointsInput.value = 10;
+            } else {
+              taskInput.value = task.text || '';
+              if (pointsInput) pointsInput.value = task.points || 10;
+            }
           }
         });
       }, 100);
