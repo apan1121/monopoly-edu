@@ -374,6 +374,30 @@
     color: #666;
   }
 
+  .snake-ladder-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  }
+
+  .snake-ladder-input:hover {
+    border-color: #c1c9d2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .snake-ladder-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+
   .btn {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
@@ -665,6 +689,40 @@
     0% { transform: scale(0); }
     50% { transform: scale(1.2); }
     100% { transform: scale(1); }
+  }
+
+  /* 當前輪到的玩家棋子 */
+  .player-token.current-turn {
+    width: 32px;
+    height: 32px;
+    border: 3px solid white;
+    box-shadow:
+      0 0 0 3px rgba(255, 215, 0, 0.8),
+      0 0 20px rgba(255, 215, 0, 0.6),
+      0 0 30px rgba(255, 215, 0, 0.4),
+      0 4px 8px rgba(0,0,0,0.3);
+    animation: currentPlayerPulse 2s ease-in-out infinite;
+    z-index: 10;
+    position: relative;
+  }
+
+  @keyframes currentPlayerPulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow:
+        0 0 0 3px rgba(255, 215, 0, 0.8),
+        0 0 20px rgba(255, 215, 0, 0.6),
+        0 0 30px rgba(255, 215, 0, 0.4),
+        0 4px 8px rgba(0,0,0,0.3);
+    }
+    50% {
+      transform: scale(1.15);
+      box-shadow:
+        0 0 0 4px rgba(255, 215, 0, 1),
+        0 0 25px rgba(255, 215, 0, 0.8),
+        0 0 40px rgba(255, 215, 0, 0.6),
+        0 6px 12px rgba(0,0,0,0.4);
+    }
   }
 
   /* ========== 骰子控制側邊欄 ========== */
@@ -1295,6 +1353,27 @@
         <input type="checkbox" id="hiddenMode" style="width: auto; margin: 0;">
         <label style="margin: 0; cursor: pointer;" for="hiddenMode">啟用隱藏模式（格子在玩家走過前為迷霧遮蓋）</label>
       </div>
+      <div class="input-group" style="display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="snakeLadderMode" style="width: auto; margin: 0;" onchange="toggleSnakeLadderSettings()">
+        <label style="margin: 0; cursor: pointer;" for="snakeLadderMode">🐍🪜 啟用蛇梯模式（增加蛇和梯子）</label>
+      </div>
+
+      <!-- 蛇梯設定區域 -->
+      <div id="snakeLadderSettings" style="display: none; margin-top: 15px; margin-bottom: 25px; padding: 15px; background: linear-gradient(135deg, #fff5e8 0%, #ffe8d1 100%); border-radius: 12px; border-left: 4px solid #f5576c;">
+        <h3 style="margin-top: 0; color: #f5576c;">🐍🪜 蛇梯設定</h3>
+        <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">遊戲從上往下走，數字越小越接近終點</p>
+        <div class="input-group">
+          <label>🪜 梯子數量（往下滑，加速前進 ⬇️）</label>
+          <input type="number" id="ladderCount" min="0" max="10" value="1">
+        </div>
+        <div class="input-group">
+          <label>🐍 蛇數量（往上爬，後退懲罰 ⬆️）</label>
+          <input type="number" id="snakeCount" min="0" max="10" value="1">
+        </div>
+        <button class="btn btn-small" onclick="generateSnakeLadderInputs()" style="background: linear-gradient(135deg, #f093fb, #f5576c);">產生蛇梯設定欄位</button>
+        <div id="snakeLadderInputs" style="margin-top: 15px;"></div>
+      </div>
+
       <button class="btn btn-small" onclick="generateTaskInputs()">產生任務輸入欄位</button>
       <div id="tasksInputs" style="margin-top: 15px;"></div>
     </div>
@@ -1318,8 +1397,9 @@
     <!-- 主要遊戲區 -->
     <div class="game-main">
       <!-- 棋盤 -->
-      <div id="boardContainer">
-        <div id="board"></div>
+      <div id="boardContainer" style="position: relative;">
+        <div id="board" style="position: relative; z-index: 1;"></div>
+        <svg id="snakeLadderLines" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2;"></svg>
       </div>
 
       <!-- 骰子控制側邊欄 -->
@@ -1372,6 +1452,15 @@
       <div class="modal-footer" id="taskButtons" style="display: none;">
         <button class="btn btn-success" onclick="completeTask(true)">✅ 完成</button>
         <button class="btn btn-danger" onclick="completeTask(false)">❌ 失敗</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 蛇梯彈窗 ========== -->
+  <div id="snakeLadderModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header" id="snakeLadderHeader">🐍🪜 蛇梯事件</div>
+      <div style="padding: 30px; text-align: center; font-size: 1.1em; line-height: 1.8;" id="snakeLadderContent">
       </div>
     </div>
   </div>
@@ -1571,6 +1660,91 @@ function generateTaskInputs() {
   }
 }
 
+// 切換蛇梯設定區域顯示
+function toggleSnakeLadderSettings() {
+  const checkbox = document.getElementById('snakeLadderMode');
+  const settings = document.getElementById('snakeLadderSettings');
+  settings.style.display = checkbox.checked ? 'block' : 'none';
+}
+
+// 生成蛇梯設定欄位
+function generateSnakeLadderInputs() {
+  const ladderCount = parseInt(document.getElementById('ladderCount').value);
+  const snakeCount = parseInt(document.getElementById('snakeCount').value);
+  const container = document.getElementById('snakeLadderInputs');
+  const cellCount = parseInt(document.getElementById('cellCount').value);
+
+  container.innerHTML = '';
+
+  // 生成梯子設定
+  if (ladderCount > 0) {
+    const ladderSection = document.createElement('div');
+    ladderSection.innerHTML = '<h4 style="color: #11998e; margin-top: 0;">🪜 梯子設定（往下滑，加速前進）</h4>';
+
+    for (let i = 0; i < ladderCount; i++) {
+      const div = document.createElement('div');
+      div.className = 'task-item';
+      div.style.background = 'linear-gradient(135deg, #e8fff5 0%, #d1f5e8 100%)';
+      div.style.borderLeft = '4px solid #11998e';
+
+      // 隨機生成梯子的起點（較小數字）和終點（較大數字）
+      const ladderFrom = Math.floor(Math.random() * (cellCount - 10 - 1 + 1)) + 1; // 1 到 cellCount-10 之間
+      const ladderTo = Math.floor(Math.random() * (cellCount - 1 - (ladderFrom + 5) + 1)) + (ladderFrom + 5); // ladderFrom+5 到 cellCount-1 之間
+
+      div.innerHTML = `
+        <label><strong>梯子 ${i + 1}</strong></label>
+        <div style="display: flex; gap: 15px; align-items: center;">
+          <div style="flex: 1;">
+            <label style="font-size: 0.85em; color: #666;">從格子（較小數字）</label>
+            <input type="number" id="ladder${i}From" min="1" max="${cellCount - 2}" value="${ladderFrom}" class="snake-ladder-input">
+          </div>
+          <div style="font-size: 2em; color: #11998e;">⬇️</div>
+          <div style="flex: 1;">
+            <label style="font-size: 0.85em; color: #666;">到格子（較大數字）</label>
+            <input type="number" id="ladder${i}To" min="2" max="${cellCount - 1}" value="${ladderTo}" class="snake-ladder-input">
+          </div>
+        </div>
+      `;
+      ladderSection.appendChild(div);
+    }
+    container.appendChild(ladderSection);
+  }
+
+  // 生成蛇設定
+  if (snakeCount > 0) {
+    const snakeSection = document.createElement('div');
+    snakeSection.innerHTML = '<h4 style="color: #f5576c; margin-top: 15px;">🐍 蛇設定（往上爬，後退懲罰）</h4>';
+
+    for (let i = 0; i < snakeCount; i++) {
+      const div = document.createElement('div');
+      div.className = 'task-item';
+      div.style.background = 'linear-gradient(135deg, #fff0f0 0%, #ffe8e8 100%)';
+      div.style.borderLeft = '4px solid #f5576c';
+
+      // 隨機生成蛇的起點（較大數字）和終點（較小數字）
+      const snakeFrom = Math.floor(Math.random() * (cellCount - 10 - 5 + 1)) + 10; // 10 到 cellCount-5 之間
+      const snakeTo = Math.floor(Math.random() * (snakeFrom - 5 - 1 + 1)) + 1; // 1 到 snakeFrom-5 之間
+
+      div.innerHTML = `
+        <label><strong>蛇 ${i + 1}</strong></label>
+        <div style="display: flex; gap: 15px; align-items: center;">
+          <div style="flex: 1;">
+            <label style="font-size: 0.85em; color: #666;">從格子（較大數字）</label>
+            <input type="number" id="snake${i}From" min="2" max="${cellCount - 1}" value="${snakeFrom}" class="snake-ladder-input">
+          </div>
+          <div style="font-size: 2em; color: #f5576c;">⬆️</div>
+          <div style="flex: 1;">
+            <label style="font-size: 0.85em; color: #666;">到格子（較小數字）</label>
+            <input type="number" id="snake${i}To" min="1" max="${cellCount - 2}" value="${snakeTo}" class="snake-ladder-input">
+          </div>
+        </div>
+      `;
+      snakeSection.appendChild(div);
+    }
+    container.appendChild(snakeSection);
+  }
+}
+
 // 儲存任務到 localStorage
 function saveTasksToStorage() {
   const taskCount = parseInt(document.getElementById('taskCount').value);
@@ -1666,6 +1840,42 @@ function startGame() {
   availableTasks = [...gameConfig.tasks];
   usedTasks = new Set();
 
+  // 收集蛇梯設定
+  gameConfig.snakeLadderMode = document.getElementById('snakeLadderMode').checked;
+  gameConfig.ladders = [];
+  gameConfig.snakes = [];
+
+  if (gameConfig.snakeLadderMode) {
+    const ladderCount = parseInt(document.getElementById('ladderCount').value) || 0;
+    const snakeCount = parseInt(document.getElementById('snakeCount').value) || 0;
+
+    // 收集梯子設定（從小到大，往下滑）
+    for (let i = 0; i < ladderCount; i++) {
+      const fromInput = document.getElementById(`ladder${i}From`);
+      const toInput = document.getElementById(`ladder${i}To`);
+      if (fromInput && toInput) {
+        const from = parseInt(fromInput.value);
+        const to = parseInt(toInput.value);
+        if (from < to && to < gameConfig.cellCount) {
+          gameConfig.ladders.push({ from, to });
+        }
+      }
+    }
+
+    // 收集蛇設定（從大到小，往上爬）
+    for (let i = 0; i < snakeCount; i++) {
+      const fromInput = document.getElementById(`snake${i}From`);
+      const toInput = document.getElementById(`snake${i}To`);
+      if (fromInput && toInput) {
+        const from = parseInt(fromInput.value);
+        const to = parseInt(toInput.value);
+        if (from > to && to >= 1) {
+          gameConfig.snakes.push({ from, to });
+        }
+      }
+    }
+  }
+
   // 儲存任務到 localStorage
   saveTasksToStorage();
 
@@ -1697,10 +1907,29 @@ function initBoard() {
   board = [];
   const taskPositions = new Set();
 
-  // 隨機分配任務位置（避開起點和終點）
+  // 收集所有蛇梯佔用的格子位置
+  const snakeLadderPositions = new Set();
+  if (gameConfig.snakeLadderMode) {
+    if (gameConfig.ladders) {
+      gameConfig.ladders.forEach(ladder => {
+        snakeLadderPositions.add(ladder.from);
+        snakeLadderPositions.add(ladder.to);
+      });
+    }
+    if (gameConfig.snakes) {
+      gameConfig.snakes.forEach(snake => {
+        snakeLadderPositions.add(snake.from);
+        snakeLadderPositions.add(snake.to);
+      });
+    }
+  }
+
+  // 隨機分配任務位置（避開起點、終點和蛇梯位置）
   const availablePositions = [];
   for (let i = 1; i < gameConfig.cellCount - 1; i++) {
-    availablePositions.push(i);
+    if (!snakeLadderPositions.has(i)) {
+      availablePositions.push(i);
+    }
   }
 
   // 隨機選擇任務位置
@@ -1794,6 +2023,7 @@ function renderBoard() {
     const cell = board[cellIndex];
     const div = document.createElement('div');
     div.className = 'cell';
+    div.setAttribute('data-cell-index', cellIndex); // 加入格子編號標記
 
     // 計算這個格子在第幾行（從下往上）
     const row = Math.floor(displayIndex / cols);
@@ -1814,17 +2044,38 @@ function renderBoard() {
     // 檢查是否需要迷霧遮蓋（隱藏模式且該格子未被訪問）
     const isFogCovered = gameConfig.hiddenMode && !visitedCells.has(cellIndex);
 
+    // 檢查是否有蛇或梯子
+    let snakeLadderIcon = '';
+    if (gameConfig.snakeLadderMode) {
+      // 檢查梯子（從小到大）
+      for (const ladder of gameConfig.ladders || []) {
+        if (ladder.from === cellIndex) {
+          snakeLadderIcon = `<div style="font-size: 1.2em; position: absolute; top: 5px; right: 5px; background: rgba(17, 153, 142, 0.2); padding: 3px 6px; border-radius: 5px;">🪜→${ladder.to}</div>`;
+          break;
+        }
+      }
+      // 檢查蛇（從大到小）
+      if (!snakeLadderIcon) {
+        for (const snake of gameConfig.snakes || []) {
+          if (snake.from === cellIndex) {
+            snakeLadderIcon = `<div style="font-size: 1.2em; position: absolute; top: 5px; right: 5px; background: rgba(245, 87, 108, 0.2); padding: 3px 6px; border-radius: 5px;">🐍→${snake.to}</div>`;
+            break;
+          }
+        }
+      }
+    }
+
     if (cell.type === 'start') {
       div.classList.add('start');
-      div.innerHTML = `<div class="cell-number">${cellIndex}</div><div>🏠 起點</div>`;
+      div.innerHTML = `<div class="cell-number">${cellIndex}</div><div>🏠 起點</div>${snakeLadderIcon}`;
     } else if (cell.type === 'finish') {
       div.classList.add('finish');
-      div.innerHTML = `<div class="cell-number">${cellIndex}</div><div>🏁 終點</div>`;
+      div.innerHTML = `<div class="cell-number">${cellIndex}</div><div>🏁 終點</div>${snakeLadderIcon}`;
     } else if (cell.type === 'task') {
       div.classList.add('has-task');
-      div.innerHTML = `<div class="cell-number">${cellIndex}</div><div style="font-size: 2.5em;">📋</div>`;
+      div.innerHTML = `<div class="cell-number">${cellIndex}</div><div style="font-size: 2.5em;">📋</div>${snakeLadderIcon}`;
     } else {
-      div.innerHTML = `<div class="cell-number">${cellIndex}</div>`;
+      div.innerHTML = `<div class="cell-number">${cellIndex}</div>${snakeLadderIcon}`;
     }
 
     // 添加迷霧遮蓋樣式
@@ -1842,10 +2093,14 @@ function renderBoard() {
     // 添加玩家標記
     const playersDiv = document.createElement('div');
     playersDiv.className = 'cell-players';
-    players.forEach(player => {
+    players.forEach((player, index) => {
       if (player.position === cellIndex) {
         const token = document.createElement('div');
         token.className = 'player-token';
+        // 如果是當前輪到的玩家，加上 current-turn class
+        if (index === currentPlayerIndex) {
+          token.classList.add('current-turn');
+        }
         token.style.background = player.color;
         token.title = player.name;
         token.textContent = player.name.charAt(0); // 顯示名稱第一個字
@@ -1856,6 +2111,418 @@ function renderBoard() {
 
     boardDiv.appendChild(div);
   });
+
+  // 繪製蛇梯連接線（延遲執行以確保格子已渲染）
+  setTimeout(() => {
+    drawSnakeLadderLines();
+  }, 100);
+}
+
+// 繪製蛇梯連接線
+function drawSnakeLadderLines() {
+  const svg = document.getElementById('snakeLadderLines');
+  if (!svg || !gameConfig.snakeLadderMode) {
+    if (svg) svg.innerHTML = '';
+    return;
+  }
+
+  svg.innerHTML = '';
+
+  // 更新 SVG 尺寸以匹配棋盤容器
+  const boardContainer = document.getElementById('boardContainer');
+  if (boardContainer) {
+    const rect = boardContainer.getBoundingClientRect();
+    svg.setAttribute('width', rect.width);
+    svg.setAttribute('height', rect.height);
+    svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+  }
+
+  if (document.querySelectorAll('#board .cell').length === 0) {
+    console.warn('沒有找到棋盤格子');
+    return;
+  }
+
+  // 繪製梯子連接線
+  if (gameConfig.ladders && gameConfig.ladders.length > 0) {
+    console.log('繪製梯子:', gameConfig.ladders);
+    gameConfig.ladders.forEach(ladder => {
+      const fromCell = document.querySelector(`#board .cell[data-cell-index="${ladder.from}"]`);
+      const toCell = document.querySelector(`#board .cell[data-cell-index="${ladder.to}"]`);
+      if (fromCell && toCell) {
+        drawCurvedLine(svg, fromCell, toCell, '#11998e', '🪜');
+      } else {
+        console.warn('找不到梯子的格子:', ladder, 'from:', fromCell, 'to:', toCell);
+      }
+    });
+  }
+
+  // 繪製蛇連接線
+  if (gameConfig.snakes && gameConfig.snakes.length > 0) {
+    console.log('繪製蛇:', gameConfig.snakes);
+    gameConfig.snakes.forEach(snake => {
+      const fromCell = document.querySelector(`#board .cell[data-cell-index="${snake.from}"]`);
+      const toCell = document.querySelector(`#board .cell[data-cell-index="${snake.to}"]`);
+      if (fromCell && toCell) {
+        drawCurvedLine(svg, fromCell, toCell, '#f5576c', '🐍');
+      } else {
+        console.warn('找不到蛇的格子:', snake, 'from:', fromCell, 'to:', toCell);
+      }
+    });
+  }
+}
+
+// 繪製梯子或蛇的圖案連接兩個格子
+function drawCurvedLine(svg, fromCell, toCell, color, icon) {
+  const fromRect = fromCell.getBoundingClientRect();
+  const toRect = toCell.getBoundingClientRect();
+  const containerRect = document.getElementById('boardContainer').getBoundingClientRect();
+
+  // 計算起點和終點的中心位置（相對於 boardContainer）
+  const x1 = fromRect.left + fromRect.width / 2 - containerRect.left;
+  const y1 = fromRect.top + fromRect.height / 2 - containerRect.top;
+  const x2 = toRect.left + toRect.width / 2 - containerRect.left;
+  const y2 = toRect.top + toRect.height / 2 - containerRect.top;
+
+  // 判斷是梯子還是蛇
+  const isLadder = icon === '🪜';
+
+  if (isLadder) {
+    // 畫梯子
+    drawLadder(svg, x1, y1, x2, y2, color);
+  } else {
+    // 畫蛇
+    drawSnake(svg, x1, y1, x2, y2, color);
+  }
+}
+
+// 繪製梯子圖案（立體木梯風格）
+function drawLadder(svg, x1, y1, x2, y2, color) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const length = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx);
+
+  // 梯子的寬度
+  const ladderWidth = 25;
+
+  // 計算梯子兩側的位置
+  const perpX = -Math.sin(angle) * ladderWidth / 2;
+  const perpY = Math.cos(angle) * ladderWidth / 2;
+
+  // 創建漸層（木頭質感）
+  const gradientId = `ladder-gradient-${Math.random().toString(36).substr(2, 9)}`;
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+  gradient.setAttribute('id', gradientId);
+  gradient.setAttribute('x1', '0%');
+  gradient.setAttribute('y1', '0%');
+  gradient.setAttribute('x2', '100%');
+  gradient.setAttribute('y2', '0%');
+
+  const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+  stop1.setAttribute('offset', '0%');
+  stop1.setAttribute('stop-color', '#CD853F');
+
+  const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+  stop2.setAttribute('offset', '50%');
+  stop2.setAttribute('stop-color', '#DEB887');
+
+  const stop3 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+  stop3.setAttribute('offset', '100%');
+  stop3.setAttribute('stop-color', '#CD853F');
+
+  gradient.appendChild(stop1);
+  gradient.appendChild(stop2);
+  gradient.appendChild(stop3);
+  defs.appendChild(gradient);
+  svg.appendChild(defs);
+
+  // 左側支柱（帶陰影效果）
+  const leftShadow = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  leftShadow.setAttribute('x1', x1 + perpX + 2);
+  leftShadow.setAttribute('y1', y1 + perpY + 2);
+  leftShadow.setAttribute('x2', x2 + perpX + 2);
+  leftShadow.setAttribute('y2', y2 + perpY + 2);
+  leftShadow.setAttribute('stroke', 'rgba(0,0,0,0.3)');
+  leftShadow.setAttribute('stroke-width', '8');
+  leftShadow.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(leftShadow);
+
+  const leftLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  leftLine.setAttribute('x1', x1 + perpX);
+  leftLine.setAttribute('y1', y1 + perpY);
+  leftLine.setAttribute('x2', x2 + perpX);
+  leftLine.setAttribute('y2', y2 + perpY);
+  leftLine.setAttribute('stroke', `url(#${gradientId})`);
+  leftLine.setAttribute('stroke-width', '8');
+  leftLine.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(leftLine);
+
+  // 右側支柱（帶陰影效果）
+  const rightShadow = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  rightShadow.setAttribute('x1', x1 - perpX + 2);
+  rightShadow.setAttribute('y1', y1 - perpY + 2);
+  rightShadow.setAttribute('x2', x2 - perpX + 2);
+  rightShadow.setAttribute('y2', y2 - perpY + 2);
+  rightShadow.setAttribute('stroke', 'rgba(0,0,0,0.3)');
+  rightShadow.setAttribute('stroke-width', '8');
+  rightShadow.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(rightShadow);
+
+  const rightLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  rightLine.setAttribute('x1', x1 - perpX);
+  rightLine.setAttribute('y1', y1 - perpY);
+  rightLine.setAttribute('x2', x2 - perpX);
+  rightLine.setAttribute('y2', y2 - perpY);
+  rightLine.setAttribute('stroke', `url(#${gradientId})`);
+  rightLine.setAttribute('stroke-width', '8');
+  rightLine.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(rightLine);
+
+  // 橫槓數量（根據長度決定）
+  const rungCount = Math.max(4, Math.floor(length / 35));
+
+  // 繪製橫槓
+  for (let i = 1; i < rungCount; i++) {
+    const t = i / rungCount;
+    const rungX = x1 + dx * t;
+    const rungY = y1 + dy * t;
+
+    // 橫槓陰影
+    const rungShadow = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    rungShadow.setAttribute('x1', rungX + perpX + 2);
+    rungShadow.setAttribute('y1', rungY + perpY + 2);
+    rungShadow.setAttribute('x2', rungX - perpX + 2);
+    rungShadow.setAttribute('y2', rungY - perpY + 2);
+    rungShadow.setAttribute('stroke', 'rgba(0,0,0,0.3)');
+    rungShadow.setAttribute('stroke-width', '7');
+    rungShadow.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(rungShadow);
+
+    const rung = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    rung.setAttribute('x1', rungX + perpX);
+    rung.setAttribute('y1', rungY + perpY);
+    rung.setAttribute('x2', rungX - perpX);
+    rung.setAttribute('y2', rungY - perpY);
+    rung.setAttribute('stroke', `url(#${gradientId})`);
+    rung.setAttribute('stroke-width', '7');
+    rung.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(rung);
+  }
+}
+
+// 繪製蛇圖案（彩色波浪蛇）
+function drawSnake(svg, x1, y1, x2, y2, color) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  const baseAngle = Math.atan2(dy, dx);
+
+  // 使用正弦波創建蛇的身體
+  const segments = Math.max(30, Math.floor(distance / 8));
+  const points = [];
+
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    const x = x1 + dx * t;
+    const y = y1 + dy * t;
+
+    // 添加波浪效果（S型曲線）
+    const perpAngle = baseAngle + Math.PI / 2;
+    const waveAmplitude = 18 * Math.sin(t * Math.PI * 5); // 5個波浪週期
+    const offsetX = Math.cos(perpAngle) * waveAmplitude;
+    const offsetY = Math.sin(perpAngle) * waveAmplitude;
+
+    points.push({ x: x + offsetX, y: y + offsetY, t });
+  }
+
+  // 創建漸層（彩色蛇身）
+  const gradientId = `snake-gradient-${Math.random().toString(36).substr(2, 9)}`;
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+  gradient.setAttribute('id', gradientId);
+  gradient.setAttribute('x1', '0%');
+  gradient.setAttribute('y1', '0%');
+  gradient.setAttribute('x2', '100%');
+  gradient.setAttribute('y2', '0%');
+
+  // 彩色漸層（綠色到黃色到紅色）
+  const colors = [
+    { offset: '0%', color: '#228B22' },
+    { offset: '33%', color: '#90EE90' },
+    { offset: '66%', color: '#FFD700' },
+    { offset: '100%', color: '#FF6347' }
+  ];
+
+  colors.forEach(c => {
+    const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop.setAttribute('offset', c.offset);
+    stop.setAttribute('stop-color', c.color);
+    gradient.appendChild(stop);
+  });
+
+  defs.appendChild(gradient);
+  svg.appendChild(defs);
+
+  // 繪製蛇身陰影
+  let shadowPath = `M ${points[0].x + 2} ${points[0].y + 2}`;
+  for (let i = 1; i < points.length; i++) {
+    shadowPath += ` L ${points[i].x + 2} ${points[i].y + 2}`;
+  }
+
+  const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  shadow.setAttribute('d', shadowPath);
+  shadow.setAttribute('stroke', 'rgba(0,0,0,0.3)');
+  shadow.setAttribute('stroke-width', '14');
+  shadow.setAttribute('fill', 'none');
+  shadow.setAttribute('stroke-linecap', 'round');
+  shadow.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(shadow);
+
+  // 繪製蛇身主體
+  let pathData = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    pathData += ` L ${points[i].x} ${points[i].y}`;
+  }
+
+  const snakePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  snakePath.setAttribute('d', pathData);
+  snakePath.setAttribute('stroke', `url(#${gradientId})`);
+  snakePath.setAttribute('stroke-width', '12');
+  snakePath.setAttribute('fill', 'none');
+  snakePath.setAttribute('stroke-linecap', 'round');
+  snakePath.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(snakePath);
+
+  // 蛇頭（起點 x1,y1 = 較大數字格子）
+  const headX = points[0].x;
+  const headY = points[0].y;
+
+  // 計算蛇頭的方向（從起點往回看第二個點，然後反向180度）
+  const bodyAngle = Math.atan2(points[1].y - headY, points[1].x - headX);
+  const headAngle = bodyAngle + Math.PI; // 加180度讓頭朝向反方向
+
+  // 蛇頭陰影
+  const headShadow = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+  headShadow.setAttribute('cx', headX + 2);
+  headShadow.setAttribute('cy', headY + 2);
+  headShadow.setAttribute('rx', '14');
+  headShadow.setAttribute('ry', '11');
+  headShadow.setAttribute('transform', `rotate(${headAngle * 180 / Math.PI} ${headX + 2} ${headY + 2})`);
+  headShadow.setAttribute('fill', 'rgba(0,0,0,0.3)');
+  svg.appendChild(headShadow);
+
+  // 蛇頭主體（橢圓形）
+  const headEllipse = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+  headEllipse.setAttribute('cx', headX);
+  headEllipse.setAttribute('cy', headY);
+  headEllipse.setAttribute('rx', '14');
+  headEllipse.setAttribute('ry', '11');
+  headEllipse.setAttribute('transform', `rotate(${headAngle * 180 / Math.PI} ${headX} ${headY})`);
+  headEllipse.setAttribute('fill', '#FF4500');
+  svg.appendChild(headEllipse);
+
+  // 計算眼睛位置（相對於蛇頭方向）
+  const eyeOffsetX = Math.cos(headAngle) * 5;
+  const eyeOffsetY = Math.sin(headAngle) * 5;
+  const eyePerpX = -Math.sin(headAngle) * 5;
+  const eyePerpY = Math.cos(headAngle) * 5;
+
+  // 左眼白色部分
+  const eye1White = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  eye1White.setAttribute('cx', headX + eyeOffsetX + eyePerpX);
+  eye1White.setAttribute('cy', headY + eyeOffsetY + eyePerpY);
+  eye1White.setAttribute('r', '3');
+  eye1White.setAttribute('fill', 'white');
+  svg.appendChild(eye1White);
+
+  // 左眼黑色瞳孔
+  const eye1Black = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  eye1Black.setAttribute('cx', headX + eyeOffsetX + eyePerpX + 1);
+  eye1Black.setAttribute('cy', headY + eyeOffsetY + eyePerpY);
+  eye1Black.setAttribute('r', '1.5');
+  eye1Black.setAttribute('fill', 'black');
+  svg.appendChild(eye1Black);
+
+  // 右眼白色部分
+  const eye2White = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  eye2White.setAttribute('cx', headX + eyeOffsetX - eyePerpX);
+  eye2White.setAttribute('cy', headY + eyeOffsetY - eyePerpY);
+  eye2White.setAttribute('r', '3');
+  eye2White.setAttribute('fill', 'white');
+  svg.appendChild(eye2White);
+
+  // 右眼黑色瞳孔
+  const eye2Black = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  eye2Black.setAttribute('cx', headX + eyeOffsetX - eyePerpX + 1);
+  eye2Black.setAttribute('cy', headY + eyeOffsetY - eyePerpY);
+  eye2Black.setAttribute('r', '1.5');
+  eye2Black.setAttribute('fill', 'black');
+  svg.appendChild(eye2Black);
+
+  // 蛇嘴（尖端）
+  const mouthX = headX + Math.cos(headAngle) * 14;
+  const mouthY = headY + Math.sin(headAngle) * 14;
+
+  const mouth = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  mouth.setAttribute('cx', mouthX);
+  mouth.setAttribute('cy', mouthY);
+  mouth.setAttribute('r', '3');
+  mouth.setAttribute('fill', '#8B0000');
+  svg.appendChild(mouth);
+
+  // 蛇信（分叉的舌頭）
+  const tongueX = mouthX + Math.cos(headAngle) * 3;
+  const tongueY = mouthY + Math.sin(headAngle) * 3;
+  const tonguePerpX = -Math.sin(headAngle) * 2;
+  const tonguePerpY = Math.cos(headAngle) * 2;
+
+  // 舌頭主幹
+  const tongueMain = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  tongueMain.setAttribute('x1', mouthX);
+  tongueMain.setAttribute('y1', mouthY);
+  tongueMain.setAttribute('x2', tongueX + Math.cos(headAngle) * 8);
+  tongueMain.setAttribute('y2', tongueY + Math.sin(headAngle) * 8);
+  tongueMain.setAttribute('stroke', '#FF1493');
+  tongueMain.setAttribute('stroke-width', '2');
+  tongueMain.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(tongueMain);
+
+  // 舌頭左分叉
+  const tongueTipX = tongueX + Math.cos(headAngle) * 8;
+  const tongueTipY = tongueY + Math.sin(headAngle) * 8;
+
+  const tongueLeft = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  tongueLeft.setAttribute('x1', tongueTipX);
+  tongueLeft.setAttribute('y1', tongueTipY);
+  tongueLeft.setAttribute('x2', tongueTipX + Math.cos(headAngle - 0.3) * 4 + tonguePerpX);
+  tongueLeft.setAttribute('y2', tongueTipY + Math.sin(headAngle - 0.3) * 4 + tonguePerpY);
+  tongueLeft.setAttribute('stroke', '#FF1493');
+  tongueLeft.setAttribute('stroke-width', '1.5');
+  tongueLeft.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(tongueLeft);
+
+  // 舌頭右分叉
+  const tongueRight = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  tongueRight.setAttribute('x1', tongueTipX);
+  tongueRight.setAttribute('y1', tongueTipY);
+  tongueRight.setAttribute('x2', tongueTipX + Math.cos(headAngle + 0.3) * 4 - tonguePerpX);
+  tongueRight.setAttribute('y2', tongueTipY + Math.sin(headAngle + 0.3) * 4 - tonguePerpY);
+  tongueRight.setAttribute('stroke', '#FF1493');
+  tongueRight.setAttribute('stroke-width', '1.5');
+  tongueRight.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(tongueRight);
+
+  // 蛇尾（終點 x2,y2 = 較小數字格子）
+  const tailX = points[points.length - 1].x;
+  const tailY = points[points.length - 1].y;
+
+  const tailCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  tailCircle.setAttribute('cx', tailX);
+  tailCircle.setAttribute('cy', tailY);
+  tailCircle.setAttribute('r', '6');
+  tailCircle.setAttribute('fill', '#228B22');
+  svg.appendChild(tailCircle);
 }
 
 function updateTurnInfo() {
@@ -1865,17 +2532,15 @@ function updateTurnInfo() {
 
 function scrollToCurrentPlayer() {
   const player = players[currentPlayerIndex];
-  const boardCells = document.querySelectorAll('#board .cell');
+  // 使用 data-cell-index 來找到正確的格子
+  const currentCell = document.querySelector(`#board .cell[data-cell-index="${player.position}"]`);
 
-  if (boardCells && boardCells.length > player.position) {
-    const currentCell = boardCells[player.position];
-    if (currentCell) {
-      currentCell.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'center'
-      });
-    }
+  if (currentCell) {
+    currentCell.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'center'
+    });
   }
 }
 
@@ -1992,6 +2657,16 @@ function movePlayer(steps) {
     } else {
       clearInterval(moveInterval);
 
+      // 檢查是否踩到蛇或梯子
+      if (gameConfig.snakeLadderMode) {
+        const snakeLadder = checkSnakeLadder(player.position);
+        if (snakeLadder) {
+          // 顯示蛇或梯子訊息（等待玩家按確認）
+          showSnakeLadderMessage(snakeLadder);
+          return;
+        }
+      }
+
       // 檢查是否到達終點
       if (player.position >= gameConfig.cellCount - 1) {
         setTimeout(() => showResults(), 1000);
@@ -2008,6 +2683,274 @@ function movePlayer(steps) {
       }
     }
   }, 300);
+}
+
+// 檢查當前位置是否有蛇或梯子
+function checkSnakeLadder(position) {
+  // 檢查梯子
+  for (const ladder of gameConfig.ladders || []) {
+    if (ladder.from === position) {
+      return { type: 'ladder', from: ladder.from, to: ladder.to };
+    }
+  }
+
+  // 檢查蛇
+  for (const snake of gameConfig.snakes || []) {
+    if (snake.from === position) {
+      return { type: 'snake', from: snake.from, to: snake.to };
+    }
+  }
+
+  return null;
+}
+
+// 儲存當前蛇梯資訊
+let currentSnakeLadder = null;
+
+// 顯示蛇或梯子訊息
+function showSnakeLadderMessage(snakeLadder) {
+  // 儲存蛇梯資訊供確認按鈕使用
+  currentSnakeLadder = snakeLadder;
+
+  const player = players[currentPlayerIndex];
+  const modal = document.getElementById('snakeLadderModal');
+  const header = document.getElementById('snakeLadderHeader');
+  const content = document.getElementById('snakeLadderContent');
+
+  // 設定訊息內容
+  if (snakeLadder.type === 'ladder') {
+    header.innerHTML = '🪜 梯子';
+    header.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
+    content.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+        <div style="font-size: 5em; line-height: 1; animation: bounce 0.6s ease-in-out;">🪜</div>
+
+        <div style="text-align: center;">
+          <div style="font-size: 1.4em; font-weight: bold; color: #11998e; margin-bottom: 8px;">
+            ${player.name} 踩到梯子！
+          </div>
+          <div style="font-size: 0.95em; color: #666; opacity: 0.9;">
+            🎉 快速前進！
+          </div>
+        </div>
+
+        <div style="
+          background: linear-gradient(135deg, rgba(17,153,142,0.1), rgba(56,239,125,0.1));
+          padding: 20px 30px;
+          border-radius: 15px;
+          border: 2px solid rgba(17,153,142,0.3);
+          width: 100%;
+          max-width: 350px;
+        ">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+            <div style="text-align: center;">
+              <div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">從格子</div>
+              <div style="
+                font-size: 2.5em;
+                font-weight: bold;
+                color: #667eea;
+                background: white;
+                width: 70px;
+                height: 70px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+              ">${snakeLadder.from}</div>
+            </div>
+
+            <div style="font-size: 2em; color: #11998e; animation: slideRight 0.8s ease-in-out infinite;">
+              ➜
+            </div>
+
+            <div style="text-align: center;">
+              <div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">前進到</div>
+              <div style="
+                font-size: 2.5em;
+                font-weight: bold;
+                color: white;
+                background: linear-gradient(135deg, #11998e, #38ef7d);
+                width: 70px;
+                height: 70px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 6px 15px rgba(17,153,142,0.4);
+              ">${snakeLadder.to}</div>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="confirmSnakeLadderMove()" style="
+          padding: 15px 40px;
+          background: linear-gradient(135deg, #11998e, #38ef7d);
+          border: none;
+          border-radius: 12px;
+          color: white;
+          font-size: 1.1em;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 4px 15px rgba(17,153,142,0.3);
+          margin-top: 10px;
+        " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(17,153,142,0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(17,153,142,0.3)';">
+          ✓ 確認移動
+        </button>
+      </div>
+
+      <style>
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-15px); }
+        }
+        @keyframes slideRight {
+          0%, 100% { transform: translateX(0); opacity: 1; }
+          50% { transform: translateX(10px); opacity: 0.6; }
+        }
+      </style>
+    `;
+  } else {
+    header.innerHTML = '🐍 蛇';
+    header.style.background = 'linear-gradient(135deg, #f5576c, #f093fb)';
+    content.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+        <div style="font-size: 5em; line-height: 1; animation: shake 0.5s ease-in-out;">🐍</div>
+
+        <div style="text-align: center;">
+          <div style="font-size: 1.4em; font-weight: bold; color: #f5576c; margin-bottom: 8px;">
+            ${player.name} 踩到蛇！
+          </div>
+          <div style="font-size: 0.95em; color: #666; opacity: 0.9;">
+            😭 後退懲罰...
+          </div>
+        </div>
+
+        <div style="
+          background: linear-gradient(135deg, rgba(245,87,108,0.1), rgba(240,147,251,0.1));
+          padding: 20px 30px;
+          border-radius: 15px;
+          border: 2px solid rgba(245,87,108,0.3);
+          width: 100%;
+          max-width: 350px;
+        ">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+            <div style="text-align: center;">
+              <div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">從格子</div>
+              <div style="
+                font-size: 2.5em;
+                font-weight: bold;
+                color: #667eea;
+                background: white;
+                width: 70px;
+                height: 70px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+              ">${snakeLadder.from}</div>
+            </div>
+
+            <div style="font-size: 2em; color: #f5576c; animation: slideLeft 0.8s ease-in-out infinite;">
+              ⬅
+            </div>
+
+            <div style="text-align: center;">
+              <div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">退回到</div>
+              <div style="
+                font-size: 2.5em;
+                font-weight: bold;
+                color: white;
+                background: linear-gradient(135deg, #f5576c, #f093fb);
+                width: 70px;
+                height: 70px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 6px 15px rgba(245,87,108,0.4);
+              ">${snakeLadder.to}</div>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="confirmSnakeLadderMove()" style="
+          padding: 15px 40px;
+          background: linear-gradient(135deg, #f5576c, #f093fb);
+          border: none;
+          border-radius: 12px;
+          color: white;
+          font-size: 1.1em;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 4px 15px rgba(245,87,108,0.3);
+          margin-top: 10px;
+        " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(245,87,108,0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(245,87,108,0.3)';">
+          ✓ 確認移動
+        </button>
+      </div>
+
+      <style>
+        @keyframes shake {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(-10deg); }
+          75% { transform: rotate(10deg); }
+        }
+        @keyframes slideLeft {
+          0%, 100% { transform: translateX(0); opacity: 1; }
+          50% { transform: translateX(-10px); opacity: 0.6; }
+        }
+      </style>
+    `;
+  }
+
+  // 顯示彈窗
+  modal.classList.add('active');
+}
+
+// 確認蛇梯移動
+function confirmSnakeLadderMove() {
+  if (!currentSnakeLadder) return;
+
+  const player = players[currentPlayerIndex];
+
+  // 移動到目標位置
+  player.position = currentSnakeLadder.to;
+  visitedCells.add(player.position);
+  renderBoard();
+  renderPlayersInfo();
+
+  // 清除蛇梯資訊
+  currentSnakeLadder = null;
+
+  // 移動後繼續遊戲流程
+  continueAfterSnakeLadder();
+}
+
+// 蛇梯移動後繼續遊戲流程
+function continueAfterSnakeLadder() {
+  const player = players[currentPlayerIndex];
+
+  // 關閉蛇梯彈窗
+  document.getElementById('snakeLadderModal').classList.remove('active');
+
+  // 檢查是否到達終點
+  if (player.position >= gameConfig.cellCount - 1) {
+    setTimeout(() => showResults(), 1000);
+  } else {
+    // 檢查是否有任務
+    const cell = board[player.position];
+    if (cell.type === 'task') {
+      // 抽取一個新任務
+      const task = getRandomTask();
+      setTimeout(() => showTask(task), 500);
+    } else {
+      setTimeout(() => nextTurn(), 1000);
+    }
+  }
 }
 
 // 從任務池中隨機抽取一個未使用的任務
@@ -2080,7 +3023,13 @@ function completeTask(success) {
 function nextTurn() {
   currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
   renderPlayersInfo();
+  renderBoard(); // 重新渲染棋盤，更新當前玩家的發光效果
   updateTurnInfo();
+
+  // 捲動到當前玩家位置
+  setTimeout(() => {
+    scrollToCurrentPlayer();
+  }, 100);
 
   // 啟用骰子點擊
   const diceDisplay = document.getElementById('diceDisplay');
@@ -2135,7 +3084,10 @@ function exportSettings() {
     taskCount: parseInt(document.getElementById('taskCount').value),
     taskSuccessScore: parseInt(document.getElementById('taskSuccessScore').value),
     hiddenMode: document.getElementById('hiddenMode').checked,
-    tasks: []
+    snakeLadderMode: document.getElementById('snakeLadderMode').checked,
+    tasks: [],
+    ladders: [],
+    snakes: []
   };
 
   // 收集任務
@@ -2148,6 +3100,36 @@ function exportSettings() {
         text: taskInput.value.trim(),
         points: pointsInput ? parseInt(pointsInput.value) || 10 : 10
       });
+    }
+  }
+
+  // 收集蛇梯設定
+  if (settings.snakeLadderMode) {
+    const ladderCount = parseInt(document.getElementById('ladderCount').value) || 0;
+    const snakeCount = parseInt(document.getElementById('snakeCount').value) || 0;
+
+    // 收集梯子
+    for (let i = 0; i < ladderCount; i++) {
+      const fromInput = document.getElementById(`ladder${i}From`);
+      const toInput = document.getElementById(`ladder${i}To`);
+      if (fromInput && toInput) {
+        settings.ladders.push({
+          from: parseInt(fromInput.value),
+          to: parseInt(toInput.value)
+        });
+      }
+    }
+
+    // 收集蛇
+    for (let i = 0; i < snakeCount; i++) {
+      const fromInput = document.getElementById(`snake${i}From`);
+      const toInput = document.getElementById(`snake${i}To`);
+      if (fromInput && toInput) {
+        settings.snakes.push({
+          from: parseInt(fromInput.value),
+          to: parseInt(toInput.value)
+        });
+      }
     }
   }
 
@@ -2193,11 +3175,18 @@ function importSettings(event) {
       if (settings.taskSuccessScore) document.getElementById('taskSuccessScore').value = settings.taskSuccessScore;
       if (settings.hiddenMode !== undefined) document.getElementById('hiddenMode').checked = settings.hiddenMode;
 
+      // 套用蛇梯模式設定
+      if (settings.snakeLadderMode !== undefined) {
+        document.getElementById('snakeLadderMode').checked = settings.snakeLadderMode;
+        toggleSnakeLadderSettings();
+      }
+
       // 產生任務欄位並填入任務
       generateTaskInputs();
 
-      // 填入任務內容
+      // 填入任務內容和蛇梯設定
       setTimeout(() => {
+        // 填入任務
         settings.tasks.forEach((task, i) => {
           const taskInput = document.getElementById(`task${i}`);
           const pointsInput = document.getElementById(`taskPoints${i}`);
@@ -2212,6 +3201,41 @@ function importSettings(event) {
             }
           }
         });
+
+        // 填入蛇梯設定
+        if (settings.snakeLadderMode && (settings.ladders || settings.snakes)) {
+          const ladderCount = settings.ladders ? settings.ladders.length : 0;
+          const snakeCount = settings.snakes ? settings.snakes.length : 0;
+
+          if (ladderCount > 0) document.getElementById('ladderCount').value = ladderCount;
+          if (snakeCount > 0) document.getElementById('snakeCount').value = snakeCount;
+
+          // 產生蛇梯輸入欄位
+          generateSnakeLadderInputs();
+
+          // 稍後填入蛇梯數值
+          setTimeout(() => {
+            // 填入梯子
+            if (settings.ladders) {
+              settings.ladders.forEach((ladder, i) => {
+                const fromInput = document.getElementById(`ladder${i}From`);
+                const toInput = document.getElementById(`ladder${i}To`);
+                if (fromInput) fromInput.value = ladder.from;
+                if (toInput) toInput.value = ladder.to;
+              });
+            }
+
+            // 填入蛇
+            if (settings.snakes) {
+              settings.snakes.forEach((snake, i) => {
+                const fromInput = document.getElementById(`snake${i}From`);
+                const toInput = document.getElementById(`snake${i}To`);
+                if (fromInput) fromInput.value = snake.from;
+                if (toInput) toInput.value = snake.to;
+              });
+            }
+          }, 100);
+        }
       }, 100);
 
       alert('設定已成功匯入！');
@@ -2226,10 +3250,18 @@ function importSettings(event) {
 }
 
 // ========== 側邊欄控制 ==========
-function toggleSidebar() {
+function toggleSidebar(forceClose = null) {
   const sidebar = document.getElementById('diceControlSidebar');
   const overlay = document.getElementById('sidebarOverlay');
   const floatingBtn = document.querySelector('.floating-button');
+
+  // 如果明確指定要關閉
+  if (forceClose === false) {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    floatingBtn.classList.remove('hidden');
+    return;
+  }
 
   sidebar.classList.toggle('open');
   overlay.classList.toggle('active');
@@ -2280,6 +3312,222 @@ window.addEventListener('resize', function() {
     }
   }, 300);
 });
+
+// 秘技：Ctrl/Cmd + K 叫出指定骰子功能
+let cheatModeActive = false;
+let selectedCheatDice = null;
+
+window.addEventListener('keydown', function(e) {
+  // Ctrl+K (Windows/Linux) 或 Cmd+K (Mac)
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+
+    // 只在遊戲進行中才能使用
+    if (document.getElementById('gamePage').style.display === 'none') {
+      return;
+    }
+
+    cheatModeActive = !cheatModeActive;
+
+    if (cheatModeActive) {
+      showCheatDicePanel();
+    } else {
+      hideCheatDicePanel();
+    }
+  }
+});
+
+function showCheatDicePanel() {
+  // 檢查是否已存在
+  let panel = document.getElementById('cheatDicePanel');
+  if (panel) {
+    panel.style.display = 'block';
+    const overlay = document.getElementById('cheatDiceOverlay');
+    if (overlay) overlay.style.display = 'block';
+    return;
+  }
+
+  // 創建秘技面板
+  panel = document.createElement('div');
+  panel.id = 'cheatDicePanel';
+  panel.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+    padding: 35px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
+    z-index: 10000;
+    color: white;
+    min-width: 380px;
+  `;
+
+  panel.innerHTML = `
+    <div style="text-align: center;">
+      <div style="font-size: 3em; margin-bottom: 10px;">🎮</div>
+      <h3 style="margin: 0 0 8px 0; color: #FFD700; font-size: 1.5em; font-weight: 600;">測試模式</h3>
+      <p style="font-size: 0.95em; opacity: 0.85; margin: 0 0 25px 0;">選擇骰子點數後按確認執行</p>
+
+      <div id="cheatDiceSelection" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px;">
+        ${[1,2,3,4,5,6].map(num => `
+          <button onclick="selectCheatDice(${num})" data-dice="${num}" class="cheat-dice-btn" style="
+            padding: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            background: rgba(255,255,255,0.15);
+            border: 3px solid rgba(255,255,255,0.25);
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+          " onmouseover="if(!this.classList.contains('selected')) {this.style.background='rgba(255,255,255,0.25)'; this.style.transform='scale(1.05)';}" onmouseout="if(!this.classList.contains('selected')) {this.style.background='rgba(255,255,255,0.15)'; this.style.transform='scale(1)';}">
+            ${num}
+          </button>
+        `).join('')}
+      </div>
+
+      <div id="cheatSelectedDisplay" style="min-height: 40px; margin-bottom: 20px; font-size: 1.1em; color: #FFD700; font-weight: 500; opacity: 0;">
+        已選擇：<span id="cheatSelectedNumber" style="font-size: 1.5em; font-weight: bold;">-</span>
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button id="cheatConfirmBtn" onclick="confirmCheatDice()" disabled style="
+          padding: 14px 32px;
+          background: linear-gradient(135deg, #11998e, #38ef7d);
+          border: none;
+          border-radius: 10px;
+          color: white;
+          font-size: 1.05em;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          opacity: 0.5;
+          flex: 1;
+          max-width: 150px;
+        ">✓ 確認</button>
+
+        <button onclick="hideCheatDicePanel()" style="
+          padding: 14px 32px;
+          background: rgba(255,255,255,0.15);
+          border: 2px solid rgba(255,255,255,0.3);
+          border-radius: 10px;
+          color: white;
+          font-size: 1.05em;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          flex: 1;
+          max-width: 150px;
+        " onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕ 關閉</button>
+      </div>
+
+      <div style="margin-top: 20px; font-size: 0.85em; opacity: 0.6;">
+        快捷鍵：Ctrl/Cmd + K
+      </div>
+    </div>
+  `;
+
+  // 添加背景遮罩
+  const overlay = document.createElement('div');
+  overlay.id = 'cheatDiceOverlay';
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+  `;
+  overlay.onclick = hideCheatDicePanel;
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(panel);
+}
+
+function selectCheatDice(number) {
+  selectedCheatDice = number;
+
+  // 更新所有按鈕的樣式
+  const allBtns = document.querySelectorAll('.cheat-dice-btn');
+  allBtns.forEach(btn => {
+    const btnNum = parseInt(btn.getAttribute('data-dice'));
+    if (btnNum === number) {
+      btn.classList.add('selected');
+      btn.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
+      btn.style.border = '3px solid #11998e';
+      btn.style.transform = 'scale(1.1)';
+      btn.style.boxShadow = '0 0 20px rgba(17, 153, 142, 0.5)';
+    } else {
+      btn.classList.remove('selected');
+      btn.style.background = 'rgba(255,255,255,0.15)';
+      btn.style.border = '3px solid rgba(255,255,255,0.25)';
+      btn.style.transform = 'scale(1)';
+      btn.style.boxShadow = 'none';
+    }
+  });
+
+  // 顯示選擇的數字
+  const display = document.getElementById('cheatSelectedDisplay');
+  const numberSpan = document.getElementById('cheatSelectedNumber');
+  display.style.opacity = '1';
+  numberSpan.textContent = number;
+
+  // 啟用確認按鈕
+  const confirmBtn = document.getElementById('cheatConfirmBtn');
+  confirmBtn.disabled = false;
+  confirmBtn.style.opacity = '1';
+  confirmBtn.style.cursor = 'pointer';
+  confirmBtn.onmouseover = function() {
+    this.style.transform = 'scale(1.05)';
+    this.style.boxShadow = '0 5px 15px rgba(17, 153, 142, 0.4)';
+  };
+  confirmBtn.onmouseout = function() {
+    this.style.transform = 'scale(1)';
+    this.style.boxShadow = 'none';
+  };
+}
+
+function confirmCheatDice() {
+  if (selectedCheatDice === null) return;
+
+  const diceValue = selectedCheatDice;
+
+  // 關閉側邊欄（跟正常擲骰子一樣）
+  toggleSidebar(false);
+
+  // 更新骰子顯示
+  const diceDisplay = document.getElementById('diceDisplay');
+  const dice = createDice(diceValue);
+  diceDisplay.innerHTML = '';
+  diceDisplay.appendChild(dice);
+
+  // 禁用骰子點擊
+  diceDisplay.classList.add('disabled');
+  isRolling = true;
+
+  // 執行移動
+  movePlayer(diceValue);
+
+  // 關閉秘技面板
+  hideCheatDicePanel();
+
+  // 重置選擇
+  selectedCheatDice = null;
+}
+
+function hideCheatDicePanel() {
+  cheatModeActive = false;
+  selectedCheatDice = null;
+  const panel = document.getElementById('cheatDicePanel');
+  const overlay = document.getElementById('cheatDiceOverlay');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+}
 </script>
 
 </body>

@@ -1,0 +1,521 @@
+# 2025-12-01 工作紀錄
+
+## 專案：大富翁教學遊戲 (monopoly-edu)
+
+---
+
+## 今日完成項目
+
+### 1. 修正側邊欄強制關閉功能
+**時間：** 上午
+**目標：** toggleSidebar() 函數支援強制關閉參數
+
+#### 1.1 功能改進
+**修改位置：** index.html 行 3084-3120
+
+**問題：**
+- 原本 toggleSidebar() 只能切換開關狀態
+- 秘技模式需要強制關閉側邊欄，但無法指定
+
+**解決方案：**
+```javascript
+function toggleSidebar(forceClose = null) {
+  // 如果明確指定要關閉
+  if (forceClose === false) {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    floatingBtn.classList.remove('hidden');
+    return;
+  }
+  // 原有的切換邏輯...
+}
+```
+
+**使用方式：**
+- `toggleSidebar()` - 切換開關
+- `toggleSidebar(false)` - 強制關閉
+
+---
+
+### 2. 重新設計測試模式 UI
+**時間：** 上午
+**目標：** 讓測試模式更美觀且需要確認才執行
+
+#### 2.1 UI 視覺改進
+**修改位置：** index.html 行 3147-3361
+
+**新設計特點：**
+
+**面板樣式：**
+- 尺寸：380px 最小寬度
+- 背景：紫色漸層 (#667eea → #764ba2)
+- 陰影：多層陰影 + 白色邊框
+- 毛玻璃效果：backdrop-filter: blur(5px)
+
+**骰子按鈕：**
+- 3x2 網格排列（1-6）
+- 預設：半透明白色背景
+- 選中：綠色漸層 + 放大 + 發光
+
+**確認機制：**
+1. 選擇骰子點數（按鈕變綠）
+2. 顯示「已選擇：X」
+3. 確認按鈕啟用
+4. 按確認才執行移動
+
+#### 2.2 交互流程
+**新增函數：**
+
+**selectCheatDice(number)：**
+```javascript
+- 儲存選擇到 selectedCheatDice 變數
+- 更新所有按鈕樣式（選中 vs 未選中）
+- 顯示已選擇數字
+- 啟用確認按鈕
+```
+
+**confirmCheatDice()：**
+```javascript
+- 檢查是否有選擇
+- 關閉側邊欄（使用 toggleSidebar(false)）
+- 更新骰子顯示
+- 禁用骰子
+- 執行玩家移動
+- 關閉測試面板
+```
+
+**改進效果：**
+- 防止誤觸直接執行
+- 視覺回饋更清楚
+- 操作流程更明確
+
+---
+
+### 3. 重新設計蛇梯彈窗 UI
+**時間：** 下午前半
+**目標：** 美化蛇梯彈窗，提升視覺效果
+
+#### 3.1 視覺設計改進
+**修改位置：** index.html 行 2718-2912
+
+**🪜 梯子版本：**
+
+**佈局：**
+- Flexbox 垂直排列（gap: 20px）
+- 圖示：5em 大小，彈跳動畫
+- 標題區：玩家名稱 + 快速前進提示
+
+**數字卡片區：**
+- 淡綠色漸層背景框
+- 綠色邊框（2px solid）
+- 最大寬度：350px
+
+**數字方塊：**
+- 起點：白色方塊 70x70px，紫色數字 #667eea
+- 終點：綠色漸層方塊，白色數字
+- 圓角：12px
+- 陰影：柔和陰影效果
+
+**箭頭動畫：**
+- 綠色 ➜ 符號（2em）
+- slideRight 動畫（左右滑動）
+
+**🐍 蛇版本：**
+
+**配色差異：**
+- 淡粉色漸層背景框
+- 粉紅色邊框
+- 終點：粉紅色漸層方塊
+
+**動畫差異：**
+- 蛇圖示：shake 動畫（左右搖晃）
+- 箭頭：⬅ 向左滑動
+
+#### 3.2 CSS 動畫
+**新增動畫：**
+
+```css
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+
+@keyframes slideRight {
+  0%, 100% { transform: translateX(0); opacity: 1; }
+  50% { transform: translateX(10px); opacity: 0.6; }
+}
+
+@keyframes slideLeft {
+  0%, 100% { transform: translateX(0); opacity: 1; }
+  50% { transform: translateX(-10px); opacity: 0.6; }
+}
+```
+
+---
+
+### 4. 蛇梯確認按鈕機制
+**時間：** 下午後半
+**目標：** 蛇梯移動需按確認按鈕才執行
+
+#### 4.1 邏輯改造
+**修改位置：** index.html 行 2660-2931
+
+**問題：**
+- 原本踩到蛇梯會自動移動（2 秒延遲）
+- 玩家來不及看清楚就移動了
+
+**解決方案：**
+
+**移除自動移動：**
+```javascript
+// 舊邏輯（已刪除）
+setTimeout(() => {
+  player.position = snakeLadder.to;
+  renderBoard();
+  continueAfterSnakeLadder();
+}, 2000);
+
+// 新邏輯
+showSnakeLadderMessage(snakeLadder);
+return; // 等待玩家按確認
+```
+
+**新增狀態變數：**
+```javascript
+let currentSnakeLadder = null; // 儲存當前蛇梯資訊
+```
+
+**showSnakeLadderMessage() 改進：**
+```javascript
+function showSnakeLadderMessage(snakeLadder) {
+  // 儲存蛇梯資訊
+  currentSnakeLadder = snakeLadder;
+
+  // 顯示彈窗內容...
+
+  // 加入確認按鈕
+  <button onclick="confirmSnakeLadderMove()">
+    ✓ 確認移動
+  </button>
+}
+```
+
+**新增確認函數：**
+```javascript
+function confirmSnakeLadderMove() {
+  if (!currentSnakeLadder) return;
+
+  const player = players[currentPlayerIndex];
+
+  // 移動到目標位置
+  player.position = currentSnakeLadder.to;
+  visitedCells.add(player.position);
+  renderBoard();
+  renderPlayersInfo();
+
+  // 清除蛇梯資訊
+  currentSnakeLadder = null;
+
+  // 繼續遊戲流程
+  continueAfterSnakeLadder();
+}
+```
+
+#### 4.2 確認按鈕樣式
+**梯子版本（綠色）：**
+```css
+padding: 15px 40px;
+background: linear-gradient(135deg, #11998e, #38ef7d);
+border: none;
+border-radius: 12px;
+font-size: 1.1em;
+box-shadow: 0 4px 15px rgba(17,153,142,0.3);
+```
+
+**Hover 效果：**
+- scale(1.05) 放大
+- 陰影加強
+
+**蛇版本（粉紅色）：**
+- 粉紅色漸層 (#f5576c → #f093fb)
+- 其他樣式相同
+
+---
+
+### 5. 更新 README.md
+**時間：** 下午結束前
+**目標：** 記錄新功能到文件
+
+#### 5.1 特色功能更新
+**新增項目：**
+- 🃏 **抽卡式任務** - 3D 翻牌動畫
+- 🪜 **蛇梯模式** - 經典大富翁機制
+
+#### 5.2 使用說明更新
+**新增蛇梯模式設定：**
+- 啟用方式
+- 梯子設定（小→大，加速前進）
+- 蛇設定（大→小，後退懲罰）
+- 視覺效果說明
+
+**遊戲進行流程更新：**
+- 蛇梯事件流程（第 4 步）
+- 抽卡式任務流程（第 5 步）
+- 當前玩家高亮說明（第 6 步）
+
+**新增測試模式秘技：**
+- 快捷鍵：Ctrl+K / Cmd+K
+- 功能說明
+- 使用時機
+
+#### 5.3 進階功能清單更新
+**新增項目：**
+- [x] 蛇梯模式（經典大富翁機制）
+- [x] 抽卡式任務系統（3D 翻牌動畫）
+- [x] 個別任務分數設定
+- [x] 任務不重複機制
+- [x] 當前玩家高亮顯示
+- [x] 測試模式（Ctrl+K 秘技）
+
+---
+
+## 修改的檔案與行數統計
+
+### index.html
+**總變更：** ~280 行修改/新增
+
+**側邊欄控制：** (行 3084-3120)
+- 新增 forceClose 參數邏輯 ~10 行
+
+**測試模式重構：** (行 3147-3361)
+- 重新設計 UI ~100 行
+- 新增選擇/確認函數 ~60 行
+- 改進視覺樣式 ~50 行
+
+**蛇梯彈窗重構：** (行 2718-2931)
+- 重新設計 UI ~100 行
+- 新增確認按鈕機制 ~20 行
+- CSS 動畫 ~40 行
+
+**移動邏輯調整：** (行 2660-2668)
+- 移除自動移動邏輯 ~10 行
+
+### README.md
+**總變更：** ~40 行新增
+
+**特色功能：** (行 13-14)
+- 新增 2 項特色功能
+
+**使用說明：** (行 89-101, 116-130)
+- 蛇梯模式設定 ~13 行
+- 遊戲流程更新 ~15 行
+- 測試模式說明 ~4 行
+
+**進階功能：** (行 268-280)
+- 新增 6 項功能清單
+
+---
+
+## 技術細節
+
+### JavaScript 技術
+
+**參數預設值：**
+```javascript
+function toggleSidebar(forceClose = null) {
+  if (forceClose === false) {
+    // 強制關閉邏輯
+  }
+}
+```
+
+**狀態管理：**
+```javascript
+let currentSnakeLadder = null;  // 全域狀態
+let selectedCheatDice = null;   // 全域狀態
+```
+
+**動態樣式操作：**
+```javascript
+btn.style.background = 'linear-gradient(...)';
+btn.style.transform = 'scale(1.1)';
+btn.style.boxShadow = '0 0 20px rgba(...)';
+```
+
+### CSS 技術
+
+**Flexbox 佈局：**
+```css
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 20px;
+```
+
+**漸層背景：**
+```css
+background: linear-gradient(135deg, #11998e, #38ef7d);
+```
+
+**多層陰影：**
+```css
+box-shadow:
+  0 20px 60px rgba(0,0,0,0.4),
+  0 0 0 1px rgba(255,255,255,0.1);
+```
+
+**毛玻璃效果：**
+```css
+backdrop-filter: blur(5px);
+```
+
+**關鍵幀動畫：**
+```css
+animation: bounce 0.6s ease-in-out;
+animation: shake 0.5s ease-in-out;
+animation: slideRight 0.8s ease-in-out infinite;
+```
+
+---
+
+## 使用者體驗提升
+
+### Before（修改前）
+
+**測試模式：**
+- 點擊數字直接執行
+- 可能誤觸
+- 無視覺回饋
+
+**蛇梯彈窗：**
+- 簡陋的文字顯示
+- 自動移動（2 秒）
+- 玩家來不及看清楚
+
+### After（修改後）
+
+**測試模式：**
+- 選擇 → 確認兩步驟
+- 選中按鈕變綠色發光
+- 顯示「已選擇：X」
+- 確認按鈕有 Hover 效果
+- 更現代化的 UI
+
+**蛇梯彈窗：**
+- 卡片式設計
+- 大號數字方塊
+- 動態箭頭動畫
+- 圖示彈跳/搖晃動畫
+- 需按確認按鈕才移動
+- 玩家有時間理解發生什麼
+
+---
+
+## 測試建議
+
+### 功能測試
+- [x] toggleSidebar(false) 強制關閉
+- [x] 測試模式選擇+確認流程
+- [x] 蛇梯彈窗確認按鈕
+- [x] 蛇梯移動邏輯正確
+- [x] 梯子視覺效果
+- [x] 蛇視覺效果
+- [ ] 不同瀏覽器測試
+- [ ] 手機版測試
+
+### 視覺測試
+- [x] 測試模式面板美觀
+- [x] 骰子選中效果
+- [x] 蛇梯彈窗樣式
+- [x] 數字方塊顯示
+- [x] 動畫流暢度
+- [x] Hover 效果
+- [ ] 響應式設計確認
+
+---
+
+## 待改進項目
+
+### 短期
+1. 蛇梯彈窗關閉動畫
+2. 測試模式鍵盤操作（1-6 按鍵）
+3. 確認按鈕音效
+
+### 中期
+1. 蛇梯連鎖效果（踩到梯子後又踩到蛇）
+2. 蛇梯移動動畫（沿著蛇身/梯子移動）
+3. 更多蛇梯圖案選擇
+
+### 長期
+1. 蛇梯編輯器（拖拉設定）
+2. 蛇梯預覽模式
+3. 蛇梯難度建議
+
+---
+
+## 本次會話工作時間分配
+
+1. **側邊欄強制關閉** - 5%
+   - 參數邏輯新增
+
+2. **測試模式重構** - 35%
+   - UI 重新設計
+   - 選擇/確認機制
+   - 樣式優化
+
+3. **蛇梯彈窗重構** - 40%
+   - 視覺設計
+   - CSS 動畫
+   - 佈局優化
+
+4. **蛇梯確認機制** - 15%
+   - 邏輯改造
+   - 狀態管理
+   - 按鈕實作
+
+5. **文件更新** - 5%
+   - README.md 更新
+   - 使用說明撰寫
+
+**總計變更行數：** ~320 行
+**新增功能數：** 2 個主要改進
+**視覺優化數：** 2 個彈窗重構
+
+---
+
+## 備註
+
+- 所有修改都保持向下相容
+- UI 改進大幅提升使用體驗
+- 確認按鈕機制讓玩家有掌控感
+- 測試模式更安全不易誤觸
+- 動畫效果增加遊戲樂趣
+
+---
+
+**記錄者：** Claude Code
+**專案路徑：** /Users/apan1121/workspace/DockerPP_V2/pp_app/web/monopoly-edu
+**Git 分支：** main
+**Git 狀態：** 未提交變更（index.html, README.md 已修改）
+
+---
+
+## 相關截圖
+
+1. 測試模式新 UI（紫色漸層面板）
+2. 蛇梯彈窗梯子版本（綠色卡片式）
+3. 蛇梯彈窗蛇版本（粉紅色卡片式）
+
+---
+
+**今日成果：**
+✅ 大幅提升測試模式使用體驗
+✅ 美化蛇梯彈窗視覺效果
+✅ 新增確認機制增加掌控感
+✅ 完善使用文件說明
