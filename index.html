@@ -1458,9 +1458,8 @@
 
   <!-- ========== 蛇梯彈窗 ========== -->
   <div id="snakeLadderModal" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
-      <div class="modal-header" id="snakeLadderHeader">🐍🪜 蛇梯事件</div>
-      <div style="padding: 30px; text-align: center; font-size: 1.1em; line-height: 1.8;" id="snakeLadderContent">
+    <div class="modal-content" style="max-width: 550px; padding: 0;">
+      <div style="padding: 40px 30px 30px; text-align: center;" id="snakeLadderContent">
       </div>
     </div>
   </div>
@@ -2146,6 +2145,14 @@ function drawSnakeLadderLines() {
   if (gameConfig.ladders && gameConfig.ladders.length > 0) {
     console.log('繪製梯子:', gameConfig.ladders);
     gameConfig.ladders.forEach(ladder => {
+      // 如果啟用迷霧模式，只要起點被訪問就繪製蛇梯
+      if (gameConfig.hiddenMode) {
+        const fromVisited = visitedCells.has(ladder.from);
+        if (!fromVisited) {
+          return; // 起點未訪問，不繪製
+        }
+      }
+
       const fromCell = document.querySelector(`#board .cell[data-cell-index="${ladder.from}"]`);
       const toCell = document.querySelector(`#board .cell[data-cell-index="${ladder.to}"]`);
       if (fromCell && toCell) {
@@ -2160,6 +2167,14 @@ function drawSnakeLadderLines() {
   if (gameConfig.snakes && gameConfig.snakes.length > 0) {
     console.log('繪製蛇:', gameConfig.snakes);
     gameConfig.snakes.forEach(snake => {
+      // 如果啟用迷霧模式，只要起點被訪問就繪製蛇梯
+      if (gameConfig.hiddenMode) {
+        const fromVisited = visitedCells.has(snake.from);
+        if (!fromVisited) {
+          return; // 起點未訪問，不繪製
+        }
+      }
+
       const fromCell = document.querySelector(`#board .cell[data-cell-index="${snake.from}"]`);
       const toCell = document.querySelector(`#board .cell[data-cell-index="${snake.to}"]`);
       if (fromCell && toCell) {
@@ -2714,87 +2729,84 @@ function showSnakeLadderMessage(snakeLadder) {
 
   const player = players[currentPlayerIndex];
   const modal = document.getElementById('snakeLadderModal');
-  const header = document.getElementById('snakeLadderHeader');
   const content = document.getElementById('snakeLadderContent');
 
   // 設定訊息內容
   if (snakeLadder.type === 'ladder') {
-    header.innerHTML = '🪜 梯子';
-    header.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
     content.innerHTML = `
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-        <div style="font-size: 5em; line-height: 1; animation: bounce 0.6s ease-in-out;">🪜</div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 25px;">
+        <div style="font-size: 6em; line-height: 1; animation: bounce 0.6s ease-in-out;">🪜</div>
 
         <div style="text-align: center;">
-          <div style="font-size: 1.4em; font-weight: bold; color: #11998e; margin-bottom: 8px;">
+          <div style="font-size: 1.5em; font-weight: bold; color: #11998e; margin-bottom: 8px;">
             ${player.name} 踩到梯子！
           </div>
-          <div style="font-size: 0.95em; color: #666; opacity: 0.9;">
+          <div style="font-size: 1em; color: #666; opacity: 0.85;">
             🎉 快速前進！
           </div>
         </div>
 
         <div style="
-          background: linear-gradient(135deg, rgba(17,153,142,0.1), rgba(56,239,125,0.1));
-          padding: 20px 30px;
-          border-radius: 15px;
-          border: 2px solid rgba(17,153,142,0.3);
+          background: linear-gradient(135deg, rgba(17,153,142,0.08), rgba(56,239,125,0.08));
+          padding: 25px 35px;
+          border-radius: 20px;
+          border: 2px solid rgba(17,153,142,0.2);
           width: 100%;
-          max-width: 350px;
+          max-width: 400px;
         ">
-          <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 25px;">
             <div style="text-align: center;">
-              <div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">從格子</div>
+              <div style="font-size: 0.9em; color: #999; margin-bottom: 8px; font-weight: 500;">從格子</div>
               <div style="
-                font-size: 2.5em;
+                font-size: 2.8em;
                 font-weight: bold;
                 color: #667eea;
                 background: white;
-                width: 70px;
-                height: 70px;
-                border-radius: 12px;
+                width: 85px;
+                height: 85px;
+                border-radius: 16px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
               ">${snakeLadder.from}</div>
             </div>
 
-            <div style="font-size: 2em; color: #11998e; animation: slideRight 0.8s ease-in-out infinite;">
-              ➜
+            <div style="font-size: 2.5em; color: #11998e; animation: slideRight 0.8s ease-in-out infinite;">
+              →
             </div>
 
             <div style="text-align: center;">
-              <div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">前進到</div>
+              <div style="font-size: 0.9em; color: #999; margin-bottom: 8px; font-weight: 500;">前進到</div>
               <div style="
-                font-size: 2.5em;
+                font-size: 2.8em;
                 font-weight: bold;
                 color: white;
                 background: linear-gradient(135deg, #11998e, #38ef7d);
-                width: 70px;
-                height: 70px;
-                border-radius: 12px;
+                width: 85px;
+                height: 85px;
+                border-radius: 16px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                box-shadow: 0 6px 15px rgba(17,153,142,0.4);
+                box-shadow: 0 6px 20px rgba(17,153,142,0.4);
               ">${snakeLadder.to}</div>
             </div>
           </div>
         </div>
 
         <button onclick="confirmSnakeLadderMove()" style="
-          padding: 15px 40px;
+          padding: 16px 50px;
           background: linear-gradient(135deg, #11998e, #38ef7d);
           border: none;
-          border-radius: 12px;
+          border-radius: 14px;
           color: white;
-          font-size: 1.1em;
+          font-size: 1.15em;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s;
           box-shadow: 0 4px 15px rgba(17,153,142,0.3);
-          margin-top: 10px;
+          margin-top: 5px;
         " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(17,153,142,0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(17,153,142,0.3)';">
           ✓ 確認移動
         </button>
@@ -2812,82 +2824,80 @@ function showSnakeLadderMessage(snakeLadder) {
       </style>
     `;
   } else {
-    header.innerHTML = '🐍 蛇';
-    header.style.background = 'linear-gradient(135deg, #f5576c, #f093fb)';
     content.innerHTML = `
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-        <div style="font-size: 5em; line-height: 1; animation: shake 0.5s ease-in-out;">🐍</div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 25px;">
+        <div style="font-size: 6em; line-height: 1; animation: shake 0.5s ease-in-out;">🐍</div>
 
         <div style="text-align: center;">
-          <div style="font-size: 1.4em; font-weight: bold; color: #f5576c; margin-bottom: 8px;">
+          <div style="font-size: 1.5em; font-weight: bold; color: #f5576c; margin-bottom: 8px;">
             ${player.name} 踩到蛇！
           </div>
-          <div style="font-size: 0.95em; color: #666; opacity: 0.9;">
+          <div style="font-size: 1em; color: #666; opacity: 0.85;">
             😭 後退懲罰...
           </div>
         </div>
 
         <div style="
-          background: linear-gradient(135deg, rgba(245,87,108,0.1), rgba(240,147,251,0.1));
-          padding: 20px 30px;
-          border-radius: 15px;
-          border: 2px solid rgba(245,87,108,0.3);
+          background: linear-gradient(135deg, rgba(245,87,108,0.08), rgba(240,147,251,0.08));
+          padding: 25px 35px;
+          border-radius: 20px;
+          border: 2px solid rgba(245,87,108,0.2);
           width: 100%;
-          max-width: 350px;
+          max-width: 400px;
         ">
-          <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 25px;">
             <div style="text-align: center;">
-              <div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">從格子</div>
+              <div style="font-size: 0.9em; color: #999; margin-bottom: 8px; font-weight: 500;">從格子</div>
               <div style="
-                font-size: 2.5em;
+                font-size: 2.8em;
                 font-weight: bold;
                 color: #667eea;
                 background: white;
-                width: 70px;
-                height: 70px;
-                border-radius: 12px;
+                width: 85px;
+                height: 85px;
+                border-radius: 16px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
               ">${snakeLadder.from}</div>
             </div>
 
-            <div style="font-size: 2em; color: #f5576c; animation: slideLeft 0.8s ease-in-out infinite;">
-              ⬅
+            <div style="font-size: 2.5em; color: #f5576c; animation: slideLeft 0.8s ease-in-out infinite;">
+              ←
             </div>
 
             <div style="text-align: center;">
-              <div style="font-size: 0.85em; color: #999; margin-bottom: 5px;">退回到</div>
+              <div style="font-size: 0.9em; color: #999; margin-bottom: 8px; font-weight: 500;">退回到</div>
               <div style="
-                font-size: 2.5em;
+                font-size: 2.8em;
                 font-weight: bold;
                 color: white;
                 background: linear-gradient(135deg, #f5576c, #f093fb);
-                width: 70px;
-                height: 70px;
-                border-radius: 12px;
+                width: 85px;
+                height: 85px;
+                border-radius: 16px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                box-shadow: 0 6px 15px rgba(245,87,108,0.4);
+                box-shadow: 0 6px 20px rgba(245,87,108,0.4);
               ">${snakeLadder.to}</div>
             </div>
           </div>
         </div>
 
         <button onclick="confirmSnakeLadderMove()" style="
-          padding: 15px 40px;
+          padding: 16px 50px;
           background: linear-gradient(135deg, #f5576c, #f093fb);
           border: none;
-          border-radius: 12px;
+          border-radius: 14px;
           color: white;
-          font-size: 1.1em;
+          font-size: 1.15em;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s;
           box-shadow: 0 4px 15px rgba(245,87,108,0.3);
-          margin-top: 10px;
+          margin-top: 5px;
         " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(245,87,108,0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(245,87,108,0.3)';">
           ✓ 確認移動
         </button>
@@ -2919,7 +2929,11 @@ function confirmSnakeLadderMove() {
 
   // 移動到目標位置
   player.position = currentSnakeLadder.to;
-  visitedCells.add(player.position);
+
+  // 開啟蛇梯的起點和終點格子的迷霧
+  visitedCells.add(currentSnakeLadder.from);
+  visitedCells.add(currentSnakeLadder.to);
+
   renderBoard();
   renderPlayersInfo();
 
@@ -3338,9 +3352,36 @@ window.addEventListener('keydown', function(e) {
 });
 
 function showCheatDicePanel() {
+  // 清空之前的選擇
+  selectedCheatDice = null;
+
   // 檢查是否已存在
   let panel = document.getElementById('cheatDicePanel');
   if (panel) {
+    // 重置所有按鈕樣式
+    const allBtns = document.querySelectorAll('.cheat-dice-btn');
+    allBtns.forEach(btn => {
+      btn.classList.remove('selected');
+      btn.style.background = 'rgba(255,255,255,0.15)';
+      btn.style.border = '3px solid rgba(255,255,255,0.25)';
+      btn.style.transform = 'scale(1)';
+      btn.style.boxShadow = 'none';
+    });
+
+    // 隱藏選擇提示
+    const display = document.getElementById('cheatSelectedDisplay');
+    if (display) display.style.opacity = '0';
+
+    // 禁用確認按鈕
+    const confirmBtn = document.getElementById('cheatConfirmBtn');
+    if (confirmBtn) {
+      confirmBtn.disabled = true;
+      confirmBtn.style.opacity = '0.5';
+      confirmBtn.style.cursor = 'not-allowed';
+      confirmBtn.onmouseover = null;
+      confirmBtn.onmouseout = null;
+    }
+
     panel.style.display = 'block';
     const overlay = document.getElementById('cheatDiceOverlay');
     if (overlay) overlay.style.display = 'block';

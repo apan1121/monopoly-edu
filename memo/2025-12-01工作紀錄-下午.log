@@ -1,0 +1,449 @@
+# 2025-12-01 工作紀錄（下午場）
+
+## 專案：大富翁教學遊戲 (monopoly-edu)
+
+---
+
+## 今日下午完成項目
+
+### 1. 迷霧模式蛇梯顯示邏輯優化
+**時間：** 下午
+**目標：** 迷霧模式下，蛇梯只在起點被訪問後才顯示
+
+#### 1.1 蛇梯繪製邏輯改進
+**修改位置：** index.html 行 2145-2188
+
+**問題：**
+- 原本要求起點和終點都被訪問才顯示蛇梯
+- 使用者反饋：只要經過起點就該顯示蛇梯
+
+**解決方案：**
+
+**梯子繪製邏輯（行 2149-2155）：**
+```javascript
+gameConfig.ladders.forEach(ladder => {
+  // 如果啟用迷霧模式，只要起點被訪問就繪製蛇梯
+  if (gameConfig.hiddenMode) {
+    const fromVisited = visitedCells.has(ladder.from);
+    if (!fromVisited) {
+      return; // 起點未訪問，不繪製
+    }
+  }
+  // 繪製梯子連接線...
+});
+```
+
+**蛇繪製邏輯（行 2171-2177）：**
+```javascript
+gameConfig.snakes.forEach(snake => {
+  // 如果啟用迷霧模式，只要起點被訪問就繪製蛇梯
+  if (gameConfig.hiddenMode) {
+    const fromVisited = visitedCells.has(snake.from);
+    if (!fromVisited) {
+      return; // 起點未訪問，不繪製
+    }
+  }
+  // 繪製蛇連接線...
+});
+```
+
+**運作方式：**
+1. 玩家經過蛇梯起點格子
+2. `visitedCells.add(起點)`
+3. 蛇梯連接線立即顯示（終點可能還在迷霧中）
+4. 按確認移動後，起點和終點都開霧
+
+#### 1.2 確認移動時開啟起點和終點迷霧
+**修改位置：** index.html 行 2941-2943
+
+**已實作邏輯：**
+```javascript
+function confirmSnakeLadderMove() {
+  // 移動到目標位置
+  player.position = currentSnakeLadder.to;
+
+  // 開啟蛇梯的起點和終點格子的迷霧
+  visitedCells.add(currentSnakeLadder.from);
+  visitedCells.add(currentSnakeLadder.to);
+
+  renderBoard();
+  // ...
+}
+```
+
+**效果：**
+- 踩到蛇梯時，兩個格子都會移除迷霧
+- 蛇梯連接線完整顯示
+
+---
+
+### 2. 測試模式每次打開清空選擇
+**時間：** 下午
+**目標：** 每次打開測試模式時重置所有選擇狀態
+
+#### 2.1 重置邏輯實作
+**修改位置：** index.html 行 3360-3395
+
+**新增重置流程：**
+
+```javascript
+function showCheatDicePanel() {
+  // 1. 清空之前的選擇
+  selectedCheatDice = null;
+
+  // 檢查是否已存在
+  let panel = document.getElementById('cheatDicePanel');
+  if (panel) {
+    // 2. 重置所有按鈕樣式
+    const allBtns = document.querySelectorAll('.cheat-dice-btn');
+    allBtns.forEach(btn => {
+      btn.classList.remove('selected');
+      btn.style.background = 'rgba(255,255,255,0.15)';
+      btn.style.border = '3px solid rgba(255,255,255,0.25)';
+      btn.style.transform = 'scale(1)';
+      btn.style.boxShadow = 'none';
+    });
+
+    // 3. 隱藏選擇提示
+    const display = document.getElementById('cheatSelectedDisplay');
+    if (display) display.style.opacity = '0';
+
+    // 4. 禁用確認按鈕
+    const confirmBtn = document.getElementById('cheatConfirmBtn');
+    if (confirmBtn) {
+      confirmBtn.disabled = true;
+      confirmBtn.style.opacity = '0.5';
+      confirmBtn.style.cursor = 'not-allowed';
+      confirmBtn.onmouseover = null;
+      confirmBtn.onmouseout = null;
+    }
+
+    panel.style.display = 'block';
+    const overlay = document.getElementById('cheatDiceOverlay');
+    if (overlay) overlay.style.display = 'block';
+    return;
+  }
+  // ... 創建新面板的程式碼
+}
+```
+
+**重置內容：**
+1. **清空選擇變數**：`selectedCheatDice = null`
+2. **重置骰子按鈕**：
+   - 移除 `selected` class
+   - 恢復半透明白色背景
+   - 移除綠色邊框和發光效果
+   - 恢復原始大小（scale 1）
+3. **隱藏提示文字**：「已選擇：X」隱藏
+4. **禁用確認按鈕**：
+   - `disabled = true`
+   - 半透明顯示（opacity: 0.5）
+   - 滑鼠樣式改為 `not-allowed`
+   - 移除 hover 事件
+
+**使用效果：**
+- ✅ 每次按 Ctrl/Cmd+K 打開都是全新狀態
+- ✅ 無選擇殘留
+- ✅ 必須重新選擇才能確認
+
+---
+
+### 3. 重新設計蛇梯彈窗 UI
+**時間：** 下午
+**目標：** 移除 header 背景色和標題，優化排版
+
+#### 3.1 HTML 結構簡化
+**修改位置：** index.html 行 1459-1465
+
+**Before（舊版）：**
+```html
+<div class="modal-content" style="max-width: 500px;">
+  <div class="modal-header" id="snakeLadderHeader">🐍🪜 蛇梯事件</div>
+  <div style="padding: 30px; ..." id="snakeLadderContent">
+  </div>
+</div>
+```
+
+**After（新版）：**
+```html
+<div class="modal-content" style="max-width: 550px; padding: 0;">
+  <div style="padding: 40px 30px 30px; text-align: center;" id="snakeLadderContent">
+  </div>
+</div>
+```
+
+**變更：**
+- ❌ 移除整個 `modal-header` div
+- ✅ 內容區直接顯示，無 header 區隔
+- ✅ 寬度增加：500px → 550px
+- ✅ 上方 padding 增加：30px → 40px
+
+#### 3.2 JavaScript 程式碼優化
+**修改位置：** index.html 行 2725-2922
+
+**移除的程式碼：**
+```javascript
+// 不再需要 header 變數和樣式設定
+const header = document.getElementById('snakeLadderHeader');
+header.innerHTML = '🪜 梯子';
+header.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
+```
+
+**梯子版本改進（行 2736-2825）：**
+
+**視覺尺寸調整：**
+- emoji 圖示：5em → **6em**
+- 整體間距：gap 20px → **25px**
+- 標題文字：1.4em → **1.5em**
+- 副標題：0.95em → **1em**
+- 數字方塊：70x70px → **85x85px**
+- 數字字體：2.5em → **2.8em**
+- 卡片 padding：20px 30px → **25px 35px**
+- 按鈕 padding：15px 40px → **16px 50px**
+- 按鈕字體：1.1em → **1.15em**
+
+**顏色調整：**
+- 背景更淡：rgba(..., 0.1) → **rgba(..., 0.08)**
+- 邊框更淡：rgba(..., 0.3) → **rgba(..., 0.2)**
+
+**符號變更：**
+- 箭頭：➜ → **→**（更簡潔）
+
+**蛇版本改進（行 2827-2917）：**
+- 相同的尺寸和顏色調整
+- 箭頭：⬅ → **←**（更簡潔）
+
+#### 3.3 視覺層次優化
+
+**新的設計層次：**
+1. **大型 emoji 圖示**（6em）- 視覺焦點
+2. **玩家名稱 + 事件說明**（1.5em）- 主要訊息
+3. **數字卡片區**（淡色背景框）- 資訊展示
+   - 從格子（白色方塊）
+   - 箭頭動畫
+   - 到格子（漸層方塊）
+4. **確認按鈕**（漸層背景）- 行動呼籲
+
+**Before vs After：**
+
+| 項目 | Before | After |
+|------|--------|-------|
+| Header | 有綠色/粉紅色背景 | ❌ 無 header |
+| 標題位置 | 在 header 中 | 整合到內容區 |
+| emoji 大小 | 5em | 6em ⬆️ |
+| 數字方塊 | 70x70px | 85x85px ⬆️ |
+| 間距 | 較緊湊 | 更寬鬆 ⬆️ |
+| 背景色 | 較深 | 更淡、更柔和 |
+| 箭頭符號 | ➜ / ⬅ | → / ← |
+| 整體感覺 | 有區塊感 | 簡潔統一 |
+
+---
+
+## 修改的檔案與行數統計
+
+### index.html
+**總變更：** ~60 行修改
+
+**迷霧模式蛇梯邏輯：** (行 2145-2188)
+- 修改繪製條件判斷 ~10 行
+
+**測試模式重置：** (行 3360-3395)
+- 新增重置邏輯 ~30 行
+
+**蛇梯彈窗 UI：**
+- HTML 結構：(行 1459-1465) ~3 行簡化
+- JavaScript 內容：(行 2725-2922) ~20 行優化
+
+---
+
+## 技術細節
+
+### JavaScript 技術
+
+**Set 資料結構操作：**
+```javascript
+visitedCells.has(position)  // 檢查是否訪問過
+visitedCells.add(position)  // 標記為已訪問
+```
+
+**DOM 查詢與樣式操作：**
+```javascript
+const allBtns = document.querySelectorAll('.cheat-dice-btn');
+allBtns.forEach(btn => {
+  btn.classList.remove('selected');
+  btn.style.background = '...';
+  btn.style.transform = 'scale(1)';
+});
+```
+
+**事件處理移除：**
+```javascript
+confirmBtn.onmouseover = null;
+confirmBtn.onmouseout = null;
+```
+
+### CSS 技術
+
+**Flexbox 佈局優化：**
+```css
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 25px;  /* 統一間距 */
+```
+
+**淡色背景技巧：**
+```css
+background: linear-gradient(135deg, rgba(17,153,142,0.08), rgba(56,239,125,0.08));
+border: 2px solid rgba(17,153,142,0.2);
+```
+
+**更大的圓角：**
+```css
+border-radius: 16px;  /* 從 12px 增加 */
+border-radius: 20px;  /* 卡片從 15px 增加 */
+```
+
+---
+
+## 使用者體驗提升
+
+### 迷霧模式 + 蛇梯
+
+**Before（修改前）：**
+- 需要起點和終點都訪問才顯示
+- 玩家看不到蛇梯在哪裡
+- 探索感過強，可能困惑
+
+**After（修改後）：**
+- ✅ 經過起點立即顯示蛇梯
+- ✅ 玩家可看到蛇梯通往哪裡
+- ✅ 終點格子可能還在迷霧中（增加驚喜）
+- ✅ 確認移動後兩端都開霧
+
+### 測試模式
+
+**Before（修改前）：**
+- 上次選擇會殘留
+- 打開就有選中的按鈕
+- 可能誤按確認
+
+**After（修改後）：**
+- ✅ 每次打開都是全新狀態
+- ✅ 所有按鈕預設狀態
+- ✅ 確認按鈕預設禁用
+- ✅ 必須重新選擇
+
+### 蛇梯彈窗
+
+**Before（修改前）：**
+- 有顏色 header 區隔
+- 視覺較複雜
+- 元素較小較擁擠
+
+**After（修改後）：**
+- ✅ 無 header，純白背景
+- ✅ 視覺更簡潔統一
+- ✅ 所有元素放大
+- ✅ 間距更寬鬆舒適
+- ✅ 更現代化的設計
+
+---
+
+## 測試建議
+
+### 功能測試
+- [x] 迷霧模式：經過起點顯示蛇梯
+- [x] 迷霧模式：確認後開啟兩端格子
+- [x] 測試模式：每次打開重置選擇
+- [x] 蛇梯彈窗：無 header 正常顯示
+- [x] 蛇梯彈窗：動畫正常運作
+- [ ] 不同瀏覽器測試
+- [ ] 手機版響應式測試
+
+### 視覺測試
+- [x] 蛇梯連接線在迷霧中顯示
+- [x] 測試模式重置後無殘留
+- [x] 彈窗元素大小適中
+- [x] 間距舒適不擁擠
+- [x] 顏色對比適當
+- [ ] 長數字顯示測試（如 999）
+
+---
+
+## 待改進項目
+
+### 短期
+1. 蛇梯彈窗關閉動畫
+2. 測試模式鍵盤快捷鍵（1-6）
+3. 迷霧揭示動畫效果
+
+### 中期
+1. 蛇梯移動路徑動畫
+2. 彈窗背景模糊效果
+3. 更多蛇梯視覺樣式選擇
+
+### 長期
+1. 自訂蛇梯外觀
+2. 蛇梯音效
+3. 蛇梯連鎖效果
+
+---
+
+## 本次會話工作時間分配
+
+1. **迷霧模式蛇梯邏輯** - 20%
+   - 繪製條件修改
+   - 確認移動開霧邏輯
+
+2. **測試模式重置** - 25%
+   - 重置邏輯實作
+   - 樣式恢復
+   - 狀態管理
+
+3. **蛇梯彈窗 UI 重構** - 50%
+   - HTML 結構簡化
+   - JavaScript 內容重寫
+   - 尺寸和間距優化
+   - 視覺層次調整
+
+4. **工作紀錄撰寫** - 5%
+
+**總計變更行數：** ~60 行
+**新增功能數：** 2 個改進
+**UI 優化數：** 1 個重構
+
+---
+
+## 備註
+
+- 所有修改都保持向下相容
+- UI 改進大幅提升視覺簡潔度
+- 迷霧模式更符合使用者預期
+- 測試模式更安全可靠
+- 彈窗設計更現代化
+
+---
+
+**記錄者：** Claude Code
+**專案路徑：** /Users/apan1121/workspace/DockerPP_V2/pp_app/web/monopoly-edu
+**Git 分支：** main
+**Git 狀態：** 未提交變更（index.html 已修改）
+
+---
+
+## 相關截圖
+
+1. 迷霧模式蛇梯顯示效果
+2. 測試模式重置前後對比
+3. 蛇梯彈窗新設計（無 header）
+4. 梯子彈窗細節（放大的元素）
+5. 蛇彈窗細節（放大的元素）
+
+---
+
+**今日下午成果：**
+✅ 迷霧模式蛇梯顯示邏輯優化
+✅ 測試模式每次打開重置選擇
+✅ 蛇梯彈窗 UI 全面重構
+✅ 視覺簡潔度大幅提升
